@@ -1,17 +1,17 @@
 "use client";
 
-import { MoreHorizontal } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ArrowUpDown } from "lucide-react";
+// import { MoreHorizontal } from "lucide-react";
+// import { Checkbox } from "@/components/ui/checkbox";
+// import { Button } from "@/components/ui/button";
+// import {
+//   DropdownMenu,
+//   DropdownMenuContent,
+//   DropdownMenuItem,
+//   DropdownMenuLabel,
+//   DropdownMenuSeparator,
+//   DropdownMenuTrigger,
+// } from "@/components/ui/dropdown-menu";
+// import { ArrowUpDown } from "lucide-react";
 
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTableColumnHeader } from "@/components/data-table/column-header";
@@ -25,7 +25,7 @@ export type Payment = {
   email: string;
 };
 
-export const columns = [
+export const columns: ColumnDef<Payment>[] = [
   {
     accessorKey: "email",
     header: ({ column }) => (
