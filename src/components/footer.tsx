@@ -8,6 +8,7 @@ export function Footer() {
   const hiddenNavBarPaths = [
     "/login",
     "/admin/project",
+    "/admin/blog",
     "/settings",
     "/profile",
   ];
