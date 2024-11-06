@@ -52,7 +52,7 @@ export default function NavBar() {
       // Bersihkan observer saat komponen dilepas
       observer.disconnect();
     };
-  }, []);
+  }, [links]);
   const pathname = usePathname();
   const hiddenNavBarPaths = [
     "/login",
