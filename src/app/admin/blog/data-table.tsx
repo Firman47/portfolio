@@ -1,7 +1,10 @@
 "use client";
-import { Input } from "@/components/ui/input";
 import * as React from "react";
-
+import { Input } from "@/components/ui/input";
+import { DataTablePagination } from "@/components/data-table/pagination";
+import { DataTableViewOptions } from "@/components/data-table/view-options";
+import { HiOutlinePlus } from "react-icons/hi";
+import { MdDelete } from "react-icons/md";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -22,22 +25,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
 import { Button } from "@/components/ui/button";
-import { DataTablePagination } from "@/components/data-table/pagination";
-import { DataTableViewOptions } from "@/components/data-table/view-options";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
-
 export function DataTable<TData, TValue>({
   columns,
   data,
@@ -48,8 +41,8 @@ export function DataTable<TData, TValue>({
   );
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
-
   const [rowSelection, setRowSelection] = React.useState({});
+  const [globalFilter, setGlobalFilter] = React.useState("");
 
   const table = useReactTable({
     data,
@@ -62,63 +55,50 @@ export function DataTable<TData, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    onGlobalFilterChange: setGlobalFilter,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
       rowSelection,
+      globalFilter,
     },
   });
-  console.log("firman");
-  
+
   return (
     <>
-      <div className="flex items-center py-4">
-        <div className="flex items-center py-4">
-          <Input
-            placeholder="Filter emails..."
-            value={
-              (table.getColumn("amount")?.getFilterValue() as string) ?? ""
-            }
-            onChange={(event) =>
-              table.getColumn("amount")?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm"
-          />
+      <div className="border rounded-md">
+        <div className="border-b p-2 py-3 text-center rounded-md rounded-b-none w-full bg-sidebar">
+          Table Project
         </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Columns
+        <div className=" w-full flex justify-between p-2 py-3 items-center">
+          <Input
+            placeholder="Filter"
+            onChange={(event) => {
+              const value = event.target.value;
+              table.setGlobalFilter(value);
+              setGlobalFilter(value);
+            }}
+            value={globalFilter}
+            className="max-w-sm"
+          />
+
+          <div className="flex gap-2">
+            <Button variant="outline">
+              <HiOutlinePlus />
+              Add
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+            <Button variant="outline">
+              <MdDelete />
+              Delete
+            </Button>
 
-      <DataTableViewOptions table={table} />
+            <DataTableViewOptions table={table} />
+          </div>
+        </div>
 
-      <div className="rounded-md border">
-        <Table>
+        <Table className="border">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -137,6 +117,7 @@ export function DataTable<TData, TValue>({
               </TableRow>
             ))}
           </TableHeader>
+
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
@@ -166,33 +147,11 @@ export function DataTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
-      </div>
 
-      {/* <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div> */}
-      {/* 
-        <div className="flex items-center justify-end space-x-2 py-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
-        </div> 
-        */}
-      <DataTablePagination table={table} />
+        <div className="py-3">
+          <DataTablePagination table={table} />
+        </div>
+      </div>
     </>
   );
 }

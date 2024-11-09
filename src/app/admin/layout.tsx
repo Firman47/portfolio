@@ -8,7 +8,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <AppSidebar />
       <div className="w-full">
         <Header />
-        <main className=" h-screen w-full px-4">{children}</main>
+        <main className="w-full px-4">{children}</main>
       </div>
     </SidebarProvider>
   );

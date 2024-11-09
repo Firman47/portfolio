@@ -34,7 +34,13 @@ export default function Project() {
       id="project"
       className="container mx-auto px-4 lg:px-24 py-16 flex flex-col justify-center items-center gap-4 lg:gap-8 text-center"
     >
-      <div className="space-y-2">
+      <div
+        data-aos="fade-up"
+        data-aos-offset="200"
+        data-aos-duration="500"
+        data-aos-easing="ease-in-out"
+        data-aos-once="false"
+      >
         <h3 className="text-2xl font-semibold">Project</h3>
 
         <p className="text-sm text-muted-foreground">
@@ -44,7 +50,14 @@ export default function Project() {
 
       <div className="flex gap-2 flex-wrap justify-center items-center">
         {projects.map((item, index) => (
-          <Card className="w-[350px] p-2 space-y-2  text-start" key={index}>
+          <Card
+            className="w-[350px] p-2 space-y-2  text-start"
+            key={index}
+            data-aos="fade-right"
+            data-aos-duration="700"
+            data-aos-easing="ease-in-out"
+            data-aos-once="false"
+          >
             <AspectRatio ratio={16 / 9}>
               <Image
                 src={item.img}
@@ -72,7 +85,16 @@ export default function Project() {
         ))}
       </div>
 
-      <Button size="lg" variant="outline" className="bg-opacity-0">
+      <Button
+        size="lg"
+        variant="outline"
+        className="bg-opacity-0"
+        data-aos="fade-up"
+        data-aos-offset="0"
+        data-aos-duration="500"
+        data-aos-easing="ease-in-out"
+        data-aos-once="false"
+      >
         View More Projects <FiArrowRight />
       </Button>
     </section>

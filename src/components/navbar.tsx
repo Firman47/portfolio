@@ -125,19 +125,19 @@ export default function NavBar() {
               </SheetContent>
             </Sheet>
             <div className="flex gap-2">
-              <Button variant={"ghost"} size="icon">
+              <Button variant={"outline"} className="bg-black/0" size="icon">
                 <FaWhatsapp className="w-7 h-7" />
               </Button>
 
-              <Button variant={"ghost"} size="icon">
+              <Button variant={"outline"} className="bg-black/0" size="icon">
                 <FaGithub />
               </Button>
 
-              <Button variant={"ghost"} size="icon">
+              <Button variant={"outline"} className="bg-black/0" size="icon">
                 <FaInstagram className="w-6 h-6" />
               </Button>
 
-              <Button variant={"ghost"} size="icon">
+              <Button variant={"outline"} className="bg-black/0" size="icon">
                 <FaTwitter />
               </Button>
 

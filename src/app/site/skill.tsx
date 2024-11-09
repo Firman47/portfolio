@@ -60,7 +60,13 @@ export default function Skill() {
       id="skill"
       className="container max-w-4xl  mx-auto px-4 lg:px-24 py-20 flex flex-col justify-center items-center gap-4 lg:gap-8 text-center"
     >
-      <div>
+      <div
+        data-aos="fade-up"
+        data-aos-offset="200"
+        data-aos-duration="500"
+        data-aos-easing="ease-in-out"
+        data-aos-once="false"
+      >
         <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
           Skill
         </h3>
@@ -68,7 +74,15 @@ export default function Skill() {
           Lorem ipsum dolor sit amet.
         </p>
       </div>
-      <div className=" inline-flex flex-wrap w-full justify-center items-center gap-2 ">
+
+      <div
+        className=" inline-flex flex-wrap w-full justify-center items-center gap-2 "
+        data-aos="fade-up"
+        data-aos-offset="200"
+        data-aos-duration="500"
+        data-aos-easing="ease-in-out"
+        data-aos-once="false"
+      >
         {icons.map((item, index) => (
           <Button key={index} variant="default" className="py-4 px-6">
             {item.icon} {item.label}

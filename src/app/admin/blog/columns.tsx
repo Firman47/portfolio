@@ -1,7 +1,7 @@
 "use client";
 
 // import { MoreHorizontal } from "lucide-react";
-// import { Checkbox } from "@/components/ui/checkbox";
+import { Checkbox } from "@/components/ui/checkbox";
 // import { Button } from "@/components/ui/button";
 // import {
 //   DropdownMenu,
@@ -15,6 +15,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTableColumnHeader } from "@/components/data-table/column-header";
+// import { DataTableColumnHeader } from "@/components/data-table/column-header";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -27,15 +28,54 @@ export type Payment = {
 
 export const columns: ColumnDef<Payment>[] = [
   {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
+
+  {
+    accessorKey: "amount",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Amount" />
+    ),
+    filterFn: (row, columnId, value) => {
+      // Pastikan nilai pencarian adalah angka
+      const cellValue = row.getValue(columnId);
+      if (typeof cellValue === "number" && value) {
+        return cellValue.toString().includes(value); // Menangani pencarian angka
+      }
+      return false;
+    },
+  },
+
+  {
     accessorKey: "email",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Email" />
     ),
   },
+
   {
-    accessorKey: "amount",
+    accessorKey: "status",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Amount" />
+      <DataTableColumnHeader column={column} title="Status" />
     ),
   },
 ];
