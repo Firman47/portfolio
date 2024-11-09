@@ -1,21 +1,30 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { DataTable } from "@/components/data-table/data-table";
+import { columns } from "./columns";
 interface Posts {
   id: string;
   name: string;
   descriiption: string;
 }
 const Project = () => {
-  const [posts, setPosts] = useState<Posts[]>([]);
-
+  const [data, setData] = useState<Posts[]>([]);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
-    const fetchData = async () => {
-      const response = await fetch("http://localhost:3000/api/project");
-      const result = await response.json();
+    setLoading(true);
 
-      // Ambil data dari response JSON sesuai struktur
-      setPosts(result.data as Posts[]); // 'result.data' adalah array yang berisi objek 'id', 'descriiption', dan 'name'
+    const fetchData = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/project");
+        const result = await response.json();
+
+        setData(result.data as Posts[]);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchData();
@@ -23,17 +32,9 @@ const Project = () => {
 
   return (
     <>
-      {Array.isArray(posts) ? (
-        posts.map((item) => (
-          <div key={item.id}>
-            <p>ID: {item.id}</p>
-            <p>Name: {item.name}</p>
-            <p>Description: {item.descriiption}</p>
-          </div>
-        ))
-      ) : (
-        <p>No posts available</p>
-      )}
+      <div className="container mx-auto py-4">
+        <DataTable columns={columns} data={data} isLoading={loading} />
+      </div>
     </>
   );
 };

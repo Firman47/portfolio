@@ -21,9 +21,8 @@ import { DataTableColumnHeader } from "@/components/data-table/column-header";
 // You can use a Zod schema here if you want.
 export type Payment = {
   id: string;
-  amount: number;
-  status: "pending" | "processing" | "success" | "failed";
-  email: string;
+  name: string;
+  descriiption: string;
 };
 
 export const columns: ColumnDef<Payment>[] = [
@@ -51,36 +50,22 @@ export const columns: ColumnDef<Payment>[] = [
   },
 
   {
-    accessorKey: "amount",
+    accessorKey: "name",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Amount" />
-    ),
-    filterFn: (row, columnId, value) => {
-      // Pastikan nilai pencarian adalah angka
-      const cellValue = row.getValue(columnId);
-      if (typeof cellValue === "number" && value) {
-        return cellValue.toString().includes(value); // Menangani pencarian angka
-      }
-      return false;
-    },
-  },
-
-  {
-    accessorKey: "email",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Email" />
+      <DataTableColumnHeader column={column} title="Name" />
     ),
   },
 
   {
-    accessorKey: "status",
+    accessorKey: "descriiption",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Status" />
+      <DataTableColumnHeader column={column} title="Descriiption" />
     ),
   },
 
   {
     id: "actions",
+    header: "Action",
     cell: ({ row }) => {
       const payment = row.original;
 
