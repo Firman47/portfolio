@@ -31,11 +31,13 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   isLoading: boolean;
+  dialog: () => void;
 }
 export function DataTable<TData, TValue>({
   columns,
   data,
   isLoading,
+  dialog,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -87,7 +89,7 @@ export function DataTable<TData, TValue>({
           />
 
           <div className="flex gap-2">
-            <Button variant="outline">
+            <Button variant="outline" onClick={dialog}>
               <HiOutlinePlus />
               Add
             </Button>
