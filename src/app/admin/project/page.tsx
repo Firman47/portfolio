@@ -24,7 +24,8 @@ const Project = () => {
     setLoading(true);
     const fetchData = async () => {
       try {
-        const apiUrl = process.env.NEXT_API_URL;
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
         const response = await fetch(`${apiUrl}/api/project`);
         const result = await response.json();
         setData(result.data as Projects[]);
