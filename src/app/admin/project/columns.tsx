@@ -44,6 +44,30 @@ export const columns: ColumnDef<Projects>[] = [
       <DataTableColumnHeader column={column} title="Description" />
     ),
   },
+  {
+    accessorKey: "image_url",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Image" />
+    ),
+  },
+  {
+    accessorKey: "tech_stack",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Tech stack" />
+    ),
+  },
+  {
+    accessorKey: "project_url",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Project URL" />
+    ),
+  },
+  {
+    accessorKey: "repository_url",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Repository URL" />
+    ),
+  },
 
   {
     id: "actions",

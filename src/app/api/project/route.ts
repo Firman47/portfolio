@@ -12,29 +12,17 @@ import * as Yup from "yup";
 const projectSchema = Yup.object({
   name: Yup.string().required("Project name is required"),
   description: Yup.string().required("Description is required"),
-  // image_url: Yup.string()
-  //   .url("Invalid image URL")
-  //   .required("Image URL is required"),
-  // tech_stack: Yup.object()
-  //   .test(
-  //     "is-valid-tech-stack",
-  //     "Tech stack must be a valid object with keys as technology names and array of versions",
-  //     (value) => {
-  //       // Custom validation for tech_stack
-  //       if (typeof value !== "object" || Array.isArray(value)) return false;
-  //       return Object.values(value).every(
-  //         (techVersions) =>
-  //           Array.isArray(techVersions) &&
-  //           techVersions.every((version) => typeof version === "string")
-  //       );
-  //     }
-  //   )
-  //   .required("Tech stack is required"),
-  // project_url: Yup.string().url("Invalid URL").optional(),
-  // repository_url: Yup.string().url("Invalid URL").optional(),
-  // created_at: Yup.date().required("Creation date is required"),
-  // updated_at: Yup.date().required("Update date is required"),
-});
+  image_url: Yup.string()
+    .url("Invalid image URL")
+    .required("Image URL is required"),
+  tech_stack: Yup.array()
+    .typeError("Tech stack must be a valid array")
+    .required("Tech stack is required"),
+  project_url: Yup.string().url("Invalid URL").optional(),
+  repository_url: Yup.string().url("Invalid URL").optional(),
+  created_at: Yup.date().optional(),
+  updated_at: Yup.date().optional(),
+}).noUnknown(true);
 
 export async function GET(req: NextRequest) {
   try {
@@ -62,11 +50,16 @@ export async function GET(req: NextRequest) {
     });
   }
 }
+
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
-    await projectSchema.validate(data, { abortEarly: false });
-    const createdData = await createData("projects", data);
+    const validatedData = await projectSchema.validate(data, {
+      abortEarly: false,
+    });
+    const dataWithTimestamp = { ...validatedData, created_at: new Date() };
+
+    const createdData = await createData("projects", dataWithTimestamp);
 
     return NextResponse.json({
       status: 201,

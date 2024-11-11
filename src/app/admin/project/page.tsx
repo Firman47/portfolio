@@ -64,7 +64,7 @@ const Project = () => {
       ? {
           ...column,
           cell: ({ row }: { row: Row<Projects> }) => (
-            <>
+            <div className="w-28">
               <Button
                 size="icon"
                 variant="link"
@@ -80,7 +80,7 @@ const Project = () => {
               >
                 <MdDelete />
               </Button>
-            </>
+            </div>
           ),
         }
       : column
@@ -90,6 +90,7 @@ const Project = () => {
     <>
       <div className="container mx-auto py-4">
         <DataTable
+          title="Table Project"
           columns={columns}
           data={data}
           isLoading={loading}

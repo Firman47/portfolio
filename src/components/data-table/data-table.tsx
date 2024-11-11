@@ -5,6 +5,8 @@ import { DataTablePagination } from "@/components/data-table/pagination";
 import { DataTableViewOptions } from "@/components/data-table/view-options";
 import { HiOutlinePlus } from "react-icons/hi";
 import { MdDelete } from "react-icons/md";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -28,12 +30,14 @@ import {
 import { Button } from "@/components/ui/button";
 
 interface DataTableProps<TData, TValue> {
+  title: string;
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   isLoading: boolean;
   dialog: () => void;
 }
 export function DataTable<TData, TValue>({
+  title,
   columns,
   data,
   isLoading,
@@ -71,9 +75,9 @@ export function DataTable<TData, TValue>({
 
   return (
     <>
-      <div className="border rounded-md">
+      <div className="border rounded-md container max-w-[975px] mx-auto">
         <div className="border-b p-3 text-center rounded-md rounded-b-none w-full bg-sidebar">
-          Table Project
+          {title}
         </div>
 
         <div className=" w-full flex justify-between p-3 items-center">
@@ -102,61 +106,64 @@ export function DataTable<TData, TValue>({
           </div>
         </div>
 
-        <Table className="border ">
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-
-          <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="py-4  ">
-                  <div className="mx-auto border-2 h-8 w-8 animate-spin rounded-full border-t-primary" />
-                </TableCell>
-              </TableRow>
-            ) : table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
+        <ScrollArea className="whitespace-nowrap w-full">
+          <Table className="border ">
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    );
+                  })}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="py-4  ">
+                    <div className="mx-auto border-2 h-8 w-8 animate-spin rounded-full border-t-primary" />
+                  </TableCell>
+                </TableRow>
+              ) : table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No results.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
 
         <DataTablePagination table={table} />
       </div>
