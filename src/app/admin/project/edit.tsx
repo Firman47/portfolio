@@ -86,18 +86,16 @@ const EditProjectDialog: React.FC<DialogProps> = ({
         .map((tech) => tech.trim()) // Hapus spasi kosong di setiap item
         .filter((tech) => tech); // Buang item kosong
 
-      const updatedProject = await editData(
-        `http://localhost:3000/api/project`,
-        {
-          id: project?.id,
-          name: projects.name,
-          description: projects.description,
-          image_url: projects.imageUrl,
-          tech_stack: techStackArray,
-          project_url: projects.projectUrl,
-          repository_url: projects.repositoryUrl,
-        }
-      );
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const updatedProject = await editData(`${apiUrl}/api/project`, {
+        id: project?.id,
+        name: projects.name,
+        description: projects.description,
+        image_url: projects.imageUrl,
+        tech_stack: techStackArray,
+        project_url: projects.projectUrl,
+        repository_url: projects.repositoryUrl,
+      });
       onUpdate(updatedProject.data);
       onClose();
     } catch (error) {

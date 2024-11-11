@@ -47,9 +47,9 @@ const DeleteProjectDialog: React.FC<DialogProps> = ({
 
   const handleSubmit = async () => {
     if (!project) return;
-
     try {
-      await deleteData(`http://localhost:3000/api/project`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      await deleteData(`${apiUrl}/api/project`, {
         id: project.id,
       });
       onDelete(project); // Hanya panggil onDelete sekali di sini

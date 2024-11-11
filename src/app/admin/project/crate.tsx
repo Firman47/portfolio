@@ -66,7 +66,8 @@ const CreateProjectDialog: React.FC<DialogProps> = ({
         .map((tech) => tech.trim()) // Hapus spasi kosong di setiap item
         .filter((tech) => tech); // Buang item kosong
 
-      const newProject = await postData("http://localhost:3000/api/project", {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const newProject = await postData(`${apiUrl}/api/project`, {
         name: project.name,
         description: project.description,
         image_url: project.imageUrl,
