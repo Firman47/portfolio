@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import "aos/dist/aos.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import NavBar from "@/components/navbar";
 import AOSWrapper from "@/components/aos";
