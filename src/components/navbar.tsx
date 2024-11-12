@@ -56,6 +56,7 @@ export default function NavBar() {
   const pathname = usePathname();
   const hiddenNavBarPaths = [
     "/login",
+    "/dashboard",
     "/admin/project",
     "/admin/blog",
     "/settings",
