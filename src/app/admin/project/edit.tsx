@@ -52,6 +52,8 @@ const EditProjectDialog: React.FC<DialogProps> = ({
     repositoryUrl: "",
   });
 
+  const [isLoading, setIsLoading] = useState(false);
+
   // Fungsi untuk meng-update field tertentu di project
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -80,6 +82,7 @@ const EditProjectDialog: React.FC<DialogProps> = ({
   }, [project]);
 
   const handleSubmit = async () => {
+    setIsLoading(true);
     try {
       const techStackArray = projects.techStack
         .split(/[\n,]+/) // Split berdasarkan koma atau newline
@@ -100,6 +103,8 @@ const EditProjectDialog: React.FC<DialogProps> = ({
       onClose();
     } catch (error) {
       console.error("Error updating project:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -230,7 +235,9 @@ const EditProjectDialog: React.FC<DialogProps> = ({
           </table>
 
           <DialogFooter>
-            <Button type="submit">Edit Project</Button>
+            <Button type="submit">
+              {isLoading ? "Loading..." : "Edit Project"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
