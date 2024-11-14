@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 export default function hero() {
   return (
     <section
-      className="container max-w-4xl  mx-auto px-4 lg:px-24 py-24 flex flex-col justify-center items-center gap-4 text-center "
+      className="container max-w-4xl  mx-auto px-4 lg:px-24 py-24 flex flex-col justify-center items-center gap-4 text-center box-border"
       id="home"
       data-aos="zoom-in"
       data-aos-offset="200"

@@ -68,7 +68,7 @@ export default function NavBar() {
   return (
     <>
       {shouldShowNavBar && (
-        <header className="container  mx-auto px-4 lg:px-24 h-14 sticky top-0 z-50 w-full border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex justify-between items-center">
+        <header className="container  mx-auto px-4 lg:px-24 h-14 sticky top-0 z-50 w-full border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex justify-between items-center box-border">
           <div className="flex gap-4 lg:gap-6">
             <h1 className="font-bold lg:inline-block text-lg hidden ">
               FIRMAN

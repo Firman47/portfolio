@@ -58,7 +58,7 @@ export default function Skill() {
   return (
     <section
       id="skill"
-      className="container max-w-4xl  mx-auto px-4 lg:px-24 py-20 flex flex-col justify-center items-center gap-4 lg:gap-8 text-center"
+      className="container max-w-4xl  mx-auto px-4 lg:px-24 py-20 flex flex-col justify-center items-center gap-4 lg:gap-8 text-center box-border"
     >
       <div
         data-aos="fade-up"

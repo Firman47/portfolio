@@ -31,7 +31,7 @@ export const Blog = () => {
   return (
     <section
       id="blog"
-      className="container mx-auto px-4 lg:px-24 py-20 flex flex-col justify-center items-center gap-4 lg:gap-8 text-center"
+      className="container mx-auto px-4 lg:px-24 py-20 flex flex-col justify-center items-center gap-4 lg:gap-8 text-center box-border"
     >
       <div
         data-aos="fade-up"
