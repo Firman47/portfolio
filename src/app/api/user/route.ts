@@ -6,6 +6,7 @@ export async function POST(req: NextRequest) {
     const data = await req.json();
 
     const status = await signUp(data);
+
     if (status) {
       return NextResponse.json({ message: "success" }, { status: 200 });
     } else {
