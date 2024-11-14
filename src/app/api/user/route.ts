@@ -5,7 +5,6 @@ export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
 
-    // Panggil signUp dan tunggu hasilnya
     const status = await signUp(data);
 
     if (status) {
