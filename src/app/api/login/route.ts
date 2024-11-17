@@ -2,7 +2,7 @@ import { signIn } from "@/lib/firebase/service";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 export async function POST(req: NextRequest) {
   const request: { email: string; password: string } = await req.json();
