@@ -2,6 +2,7 @@ import { signIn } from "@/lib/firebase/service";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
 export async function POST(req: NextRequest) {
   const request: { email: string; password: string } = await req.json();
@@ -40,6 +41,10 @@ export async function POST(req: NextRequest) {
         { status: 200 }
       );
 
+      NextResponse.redirect(`${BASE_URL}/admin/project`, {
+        status: 302,
+      });
+
       response.cookies.set("auth_token", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production", // Cookie hanya bekerja di HTTPS pada production
@@ -53,7 +58,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           status: false,
-          message: "Gagal login",
+          message: "Password atau email salah",
         },
         { status: 400 }
       );
@@ -71,8 +76,6 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE() {
   try {
-    const BASE_URL =
-      process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
     const response = NextResponse.redirect(`${BASE_URL}/login`, {
       status: 302,
     });
