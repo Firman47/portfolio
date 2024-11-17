@@ -7,8 +7,10 @@ import {
   retrieveDataById,
   updateData,
 } from "@/lib/firebase/service";
-
+import jwt from "jsonwebtoken";
 import * as Yup from "yup";
+import { cookies } from "next/headers";
+
 const projectSchema = Yup.object({
   name: Yup.string().required("Project name is required"),
   description: Yup.string().required("Description is required"),
@@ -24,11 +26,38 @@ const projectSchema = Yup.object({
   updated_at: Yup.date().optional(),
 }).noUnknown(true);
 
+export async function validateToken(token: string) {
+  // const token = req.headers.get("Authorization")?.split(" ")[1];
+  const JWT_SECRET =
+    process.env.NEXT_PUBLIC_JWT_SECRET ||
+    "f4f8a8233cb5d780aceabdab02579f510abf945b97c75c3ea5c424b305917ae02fa05803b2d281c0792b18fd72ed40cb403fe0b46f5e1294b422f16d5b0d1964";
+
+  if (!token) throw new Error("User not authenticated");
+
+  try {
+    return jwt.verify(token, JWT_SECRET);
+  } catch (error) {
+    console.error(error);
+    throw new Error("Invalid token");
+  }
+}
+
 export async function GET(req: NextRequest) {
   try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("auth_token")?.value;
+
+    if (!token) {
+      return NextResponse.json(
+        { status: 401, message: "User not authenticated" },
+        { status: 401 }
+      );
+    }
+
+    await validateToken(token);
+
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
-
     if (id) {
       const detailProject = await retrieveDataById("projdects", id);
       if (detailProject) {
@@ -53,6 +82,16 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("auth_token")?.value;
+    if (!token) {
+      return NextResponse.json(
+        { status: 401, message: "User not authenticated" },
+        { status: 401 }
+      );
+    }
+    await validateToken(token);
+
     const data = await req.json();
     const validatedData = await projectSchema.validate(data, {
       abortEarly: false,
@@ -77,6 +116,16 @@ export async function POST(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("auth_token")?.value;
+    if (!token) {
+      return NextResponse.json(
+        { status: 401, message: "User not authenticated" },
+        { status: 401 }
+      );
+    }
+    await validateToken(token);
+
     const { id, ...data } = await req.json();
     const updatedData = await updateData("projects", id, data);
 
@@ -96,6 +145,16 @@ export async function PUT(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("auth_token")?.value;
+    if (!token) {
+      return NextResponse.json(
+        { status: 401, message: "User not authenticated" },
+        { status: 401 }
+      );
+    }
+    await validateToken(token);
+
     const { id } = await req.json();
 
     if (id) {
@@ -109,7 +168,7 @@ export async function DELETE(req: NextRequest) {
       }
     } else {
       return NextResponse.json({
-        status: 500,
+        status: 400,
         message: `id ${id} tidak ditemukan`,
       });
     }

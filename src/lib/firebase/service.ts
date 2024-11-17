@@ -91,3 +91,23 @@ export async function signUp(userData: {
     return false;
   }
 }
+
+export async function signIn(userData: { email: string; password: string }) {
+  try {
+    const q = query(
+      collection(firestore, "users"),
+      where("email", "==", userData.email)
+    );
+
+    const snapshot = await getDocs(q);
+    const data = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      name: doc.data().name,
+      email: doc.data().email, // Pastikan email ada
+      password: doc.data().password, // Pastikan password ada
+    }));
+    return data[0];
+  } catch (error) {
+    console.error("Error saat login", error);
+  }
+}

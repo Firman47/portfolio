@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -13,13 +13,44 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+
+console.log(process.env.NODE_ENV); // Output: "development" atau sesuai dengan nilai di .env.local
 
 export default function Login() {
   const [passHide, setPassHide] = useState(true);
 
+  const router = useRouter();
+
   const togglePassHide = () => {
     setPassHide(!passHide);
   };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+      const url = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${url}/api/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+      if (result.status) {
+        router.push("/admin/project");
+      } else {
+        alert(`Error: ${result.message}`);
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
+  };
+
   return (
     <section className="w-full flex items-center  h-screen">
       <Card className="w-[350px] mx-auto">
@@ -27,13 +58,17 @@ export default function Login() {
           <CardTitle className="text-center">Login</CardTitle>
         </CardHeader>
 
-        <div className="p-4 space-y-4">
-          <CardContent className="space-y-4 p-0">
-            <form>
+        <form onSubmit={handleSubmit}>
+          <div className="p-4 space-y-4">
+            <CardContent className="space-y-4 p-0">
               <div className="grid w-full items-center gap-4">
                 <div className="flex flex-col space-y-1.5">
-                  <Label htmlFor="name">Username</Label>
-                  <Input id="name" placeholder="Name of your project" />
+                  <Label htmlFor="name">email</Label>
+                  <Input
+                    id="name"
+                    name="email"
+                    placeholder="Name of your project"
+                  />
                 </div>
 
                 <div className="flex flex-col space-y-1.5">
@@ -42,6 +77,7 @@ export default function Login() {
                     <Input
                       type={passHide ? "password" : "text"}
                       id="password"
+                      name="password"
                       placeholder="Enter your password"
                       className="pr-10"
                     />
@@ -60,13 +96,13 @@ export default function Login() {
                   </div>
                 </div>
               </div>
-            </form>
-          </CardContent>
+            </CardContent>
 
-          <CardFooter className="p-0">
-            <Button className="w-full">Login</Button>
-          </CardFooter>
-        </div>
+            <CardFooter className="p-0">
+              <Button className="w-full">Login</Button>
+            </CardFooter>
+          </div>
+        </form>
       </Card>
     </section>
   );
