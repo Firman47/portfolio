@@ -4,7 +4,10 @@ export function middleware(request: NextRequest) {
   const response = NextResponse.next(); // Membuat response lanjutan
 
   // Tambahkan Header CORS
-  response.headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
+  response.headers.set(
+    "Access-Control-Allow-Origin",
+    "http://localhost:3000, https://firmanrf.vercel.app"
+  );
   response.headers.set(
     "Access-Control-Allow-Methods",
     "GET, POST, PUT, DELETE, OPTIONS"
