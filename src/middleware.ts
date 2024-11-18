@@ -45,5 +45,5 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   // Gunakan matcher yang sesuai dengan path yang ingin Anda lindungi
-  matcher: ["/admin/:path*", "/api/:path*", "/project/:path*", "/login"],
+  matcher: ["/:path*"],
 };
