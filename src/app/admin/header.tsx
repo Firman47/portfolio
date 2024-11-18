@@ -62,8 +62,9 @@ export default function Header() {
       });
 
       if (response.ok) {
-        localStorage.clear();
         router.push("/login");
+
+        localStorage.clear();
       }
     } catch (error) {
       console.error("Error saat logout:", error);
