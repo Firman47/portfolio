@@ -18,8 +18,6 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-console.log(process.env.NODE_ENV); // Output: "development" atau sesuai dengan nilai di .env.local
-
 export default function Login() {
   const [passHide, setPassHide] = useState(true);
   const [isLoading, setIsLoading] = useState(false);

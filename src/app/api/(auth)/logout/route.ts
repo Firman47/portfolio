@@ -30,7 +30,6 @@ export async function POST() {
       path: "/",
     });
 
-    console.log("Sukses menghapus cookie");
     return response;
   } catch (error) {
     console.error("Error di DELETE handler:", error);
