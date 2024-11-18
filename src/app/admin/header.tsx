@@ -54,8 +54,8 @@ export default function Header() {
     try {
       setisLoading(true);
       const url = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${url}/api/login`, {
-        method: "DELETE",
+      const response = await fetch(`${url}/api/logout`, {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
