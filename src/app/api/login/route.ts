@@ -2,6 +2,8 @@ import { signIn } from "@/lib/firebase/service";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { cookies } from "next/headers";
+import { validateToken } from "@/lib/validateToken";
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function POST(req: NextRequest) {
@@ -76,6 +78,18 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE() {
   try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("auth_token")?.value;
+
+    if (!token) {
+      return NextResponse.json(
+        { status: 401, message: "User not authenticated" },
+        { status: 401 }
+      );
+    }
+
+    await validateToken(token);
+
     const response = NextResponse.redirect(`${BASE_URL}/login`, {
       status: 302,
     });

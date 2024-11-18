@@ -10,6 +10,7 @@ import {
 import * as Yup from "yup";
 import { cookies } from "next/headers";
 import { validateToken } from "@/lib/validateToken";
+
 const projectSchema = Yup.object({
   name: Yup.string().required("Project name is required"),
   description: Yup.string().required("Description is required"),
