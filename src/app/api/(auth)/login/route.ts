@@ -37,13 +37,10 @@ export async function POST(req: NextRequest) {
             email: result.email,
           },
           token: token,
+          redirect: `${BASE_URL}/admin/project`,
         },
         { status: 200 }
       );
-
-      NextResponse.redirect(`${BASE_URL}/admin/project`, {
-        status: 302,
-      });
 
       response.cookies.set("auth_token", token, {
         httpOnly: true,

@@ -9,6 +9,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { TbLogout2 } from "react-icons/tb";
 import { IoSettingsSharp } from "react-icons/io5";
+import { buttonVariants } from "@/components/ui/button";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,7 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
+import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 
 interface User {
@@ -120,16 +122,21 @@ export default function Header() {
       <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogTitle>Logout Confirmation</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your
-              account and remove your data from our servers.
+              Are you sure you want to log out? You will need to log in again to
+              access your account.
             </AlertDialogDescription>
           </AlertDialogHeader>
 
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={logout}>Continue</AlertDialogAction>
+            <AlertDialogAction
+              onClick={logout}
+              className={cn(buttonVariants({ variant: "destructive" }))}
+            >
+              Logout
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -144,10 +151,6 @@ export default function Header() {
               <Loader2 className="animate-spin h-16 w-16" />
             </AlertDialogDescription>
           </AlertDialogHeader>
-          {/* <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction>Continue</AlertDialogAction>
-          </AlertDialogFooter> */}
         </AlertDialogContent>
       </AlertDialog>
     </header>
