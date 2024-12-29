@@ -35,6 +35,7 @@ export default function Page() {
           <DialogHeader>
             <DialogTitle>Create Blog</DialogTitle>
           </DialogHeader>
+
           <div className="space-y-4">
             <div className="flex w-full gap-4">
               <div className="w-full">
@@ -63,6 +64,7 @@ export default function Page() {
             </div>
             <Editor />
           </div>
+
           <DialogFooter>
             <Button variant={"secondary"}>Draft</Button>
             <Button>Publish</Button>

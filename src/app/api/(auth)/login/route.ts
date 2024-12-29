@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production", // Cookie hanya bekerja di HTTPS pada production
         sameSite: "strict", // Mencegah CSRF
-        maxAge: 60 * 60, // 1 jam
+        maxAge: 600 * 60, // 1 jam
         path: "/", // Cookie tersedia di seluruh aplikasi
       });
 
