@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
+// import { validateToken } from "./lib/validateToken";
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const response = NextResponse.next(); // Membuat response lanjutan
 
   // Tambahkan Header CORS
@@ -24,25 +25,19 @@ export function middleware(request: NextRequest) {
     });
   }
 
-  // Ambil nilai cookie auth_token
   const authToken = request.cookies.get("auth_token");
-  // Cek apakah pengguna mencoba mengakses halaman login dan sudah ada token (sudah login)
   if (authToken && request.nextUrl.pathname === "/login") {
-    // Jika sudah login, arahkan ke halaman utama ("/") atau halaman lain yang sesuai
     return NextResponse.redirect(new URL("/admin/project", request.url));
   }
 
-  // Cek apakah pengguna mencoba mengakses halaman admin atau project tanpa token (belum login)
   if (
     !authToken &&
     (request.nextUrl.pathname.startsWith("/admin/project") ||
       request.nextUrl.pathname.startsWith("/admin/blog"))
   ) {
-    // Jika belum login, arahkan ke halaman login
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // Jika tidak ada masalah, lanjutkan ke halaman yang diminta
   return NextResponse.next();
 }
 

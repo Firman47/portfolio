@@ -1,7 +1,6 @@
+import "../lib/firebase";
 import { Collection, IEntity, getRepository } from "fireorm";
 import { Exclude } from "class-transformer";
-
-import "../lib/firebase";
 
 @Collection("users")
 export class User implements IEntity {

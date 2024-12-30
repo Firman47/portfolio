@@ -2,30 +2,33 @@ import { User, userRepository } from "@/models/User";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import { instanceToPlain } from "class-transformer";
-// export async function POST(req: NextRequest) {
-//   try {
-//     const data = await req.json();
+import * as Yup from "yup";
 
-//     const status = await signUp(data);
+const validateCreate = Yup.object({
+  name: Yup.string().required("name is required"),
+  email: Yup.string().email().required("Email is required"),
+  password: Yup.string().required("Password is required"),
+}).noUnknown(true);
 
-//     if (status) {
-//       return NextResponse.json({ message: "success" }, { status: 200 });
-//     } else {
-//       return NextResponse.json({ message: "failed" }, { status: 400 });
-//     }
-//   } catch (error) {
-//     return NextResponse.json({ message: "error: " + error }, { status: 500 });
-//   }
-// }
+const validateUpdate = Yup.object({
+  id: Yup.string().required("ID is required"),
+  name: Yup.string().required("name is required"),
+  email: Yup.string().email().required("Email is required"),
+}).noUnknown(true);
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const data = await req.json();
+    const req = await request.json();
+
+    await validateCreate.validate(req, { abortEarly: false });
+
     const repository = userRepository();
-    const cekEmail = await repository
-      .whereEqualTo("email", data.email)
+
+    const existingUser = await repository
+      .whereEqualTo("email", req.email)
       .findOne();
-    if (cekEmail) {
+
+    if (existingUser) {
       return NextResponse.json(
         { message: "Email already exists" },
         { status: 400 }
@@ -33,21 +36,69 @@ export async function POST(req: NextRequest) {
     }
 
     const newUser = new User();
-    newUser.name = data.name;
-    newUser.email = data.email;
-    newUser.password = await bcrypt.hash(data.password, 10);
+    newUser.name = req.name;
+    newUser.email = req.email;
+    newUser.password = await bcrypt.hash(req.password, 10);
     newUser.createdAt = new Date();
 
-    const user = instanceToPlain(await repository.create(newUser));
-    if (user) {
+    const createdUser = instanceToPlain(await repository.create(newUser));
+
+    if (createdUser) {
       return NextResponse.json(
-        { message: "success", data: user },
+        { message: "Data successfully added", data: createdUser },
         { status: 200 }
       );
     } else {
       return NextResponse.json({ message: "failed" }, { status: 400 });
     }
+  } catch (error: unknown) {
+    if (error instanceof Yup.ValidationError) {
+      return NextResponse.json(
+        { message: "Validation error", errors: error.errors },
+        { status: 400 }
+      );
+    } else {
+      return NextResponse.json({ message: "error: " + error }, { status: 500 });
+    }
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const req = await request.json();
+
+    await validateUpdate.validate(req, { abortEarly: false });
+
+    const repository = userRepository();
+
+    const data = await repository.findById(req.id);
+
+    if (data) {
+      data.name = req.name;
+      data.email = req.email;
+      data.updatedAt = new Date();
+
+      const updatedData = instanceToPlain(await repository.update(data));
+
+      if (updatedData) {
+        return NextResponse.json(
+          { message: "Data successfully updated", data: updatedData },
+          { status: 200 }
+        );
+      } else {
+        return NextResponse.json({ message: "failed" }, { status: 400 });
+      }
+    } else {
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
+    }
   } catch (error) {
-    return NextResponse.json({ message: "error: " + error }, { status: 500 });
+    if (error instanceof Yup.ValidationError) {
+      return NextResponse.json(
+        { message: "Validation error", errors: error.errors },
+        { status: 400 }
+      );
+    } else {
+      return NextResponse.json({ message: "error: " + error }, { status: 500 });
+    }
   }
 }

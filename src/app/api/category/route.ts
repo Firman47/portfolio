@@ -2,29 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import * as Yup from "yup";
 import { cookies } from "next/headers";
 import { validateToken } from "@/lib/validateToken";
-import { Blog, blogRepository } from "@/models/Blog";
-type statusBlog = "draft" | "published" | "deleted";
+import { Category, categoryRepository } from "@/models/Category";
 
 const validate = Yup.object({
-  title: Yup.string().required("title is required"),
-  content: Yup.string().required("content  is required"),
-  status: Yup.string()
-    .oneOf(["draft", "published", "deleted"], "Invalid status")
-    .required("status is required"),
-  category_id: Yup.string().required("category_id is required"),
-  created_at: Yup.date().optional(),
-  updated_at: Yup.date().optional(),
+  name: Yup.string().required("name is required"),
 }).noUnknown(true);
 
-const repository = blogRepository();
-
-function generateSlug(title: string): string {
-  return title
-    .toLowerCase() // Mengubah semua huruf menjadi kecil
-    .trim() // Menghapus spasi di awal dan akhir
-    .replace(/[^a-z0-9\s-]/g, "") // Menghapus karakter selain huruf, angka, spasi, atau tanda minus
-    .replace(/\s+/g, "-"); // Mengganti spasi dengan tanda minus
-}
+const repository = categoryRepository();
 
 export async function GET(req: NextRequest) {
   try {
@@ -43,12 +27,12 @@ export async function GET(req: NextRequest) {
     const id = searchParams.get("id");
 
     if (id) {
-      const detailBlog = await repository.findById(id);
-      if (detailBlog) {
+      const detailCategory = await repository.findById(id);
+      if (detailCategory) {
         return NextResponse.json({
           status: 200,
           message: "Success",
-          data: detailBlog,
+          data: detailCategory,
         });
       } else {
         return NextResponse.json({
@@ -63,7 +47,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     return NextResponse.json({
       status: 500,
-      message: "Failed to retrieve data" + error,
+      message: "Failed to retrieve data, " + error,
     });
   }
 }
@@ -84,14 +68,11 @@ export async function POST(request: NextRequest) {
     const req = await request.json();
     await validate.validate(req, { abortEarly: false });
 
-    const newBlog = new Blog();
-    newBlog.title = req.title as string;
-    newBlog.slug = generateSlug(newBlog.title);
-    newBlog.content = req.content as string;
-    newBlog.status = req.status as statusBlog;
-    newBlog.created_at = new Date();
+    const newCategory = new Category();
+    newCategory.name = req.name as string;
+    newCategory.created_at = new Date();
 
-    const createdData = await repository.create(newBlog);
+    const createdData = await repository.create(newCategory);
 
     return NextResponse.json({
       status: 201,
@@ -128,11 +109,7 @@ export async function PUT(request: NextRequest) {
     const data = await repository.findById(req.id as string);
 
     if (data) {
-      data.title = req.title as string;
-      data.slug = generateSlug(data.title);
-      data.content = req.content as string;
-      data.status = req.status as statusBlog;
-      data.category_id = req.category_id as string;
+      data.name = req.name as string;
       data.updated_at = new Date();
 
       const updatedData = await repository.update(data);
@@ -181,8 +158,8 @@ export async function DELETE(request: NextRequest) {
         message: "No valid ID provided to delete",
       });
     }
-
     const notFoundIds: string[] = [];
+
     const deletePromises = req.id.map(async (id: string) => {
       const data = await repository.findById(id);
       if (data) {
@@ -191,7 +168,6 @@ export async function DELETE(request: NextRequest) {
         notFoundIds.push(id);
       }
     });
-
     await Promise.all(deletePromises);
 
     if (notFoundIds.length > 0) {
