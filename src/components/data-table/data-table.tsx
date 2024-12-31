@@ -35,6 +35,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   isLoading: boolean;
   dialog: () => void;
+  deleteDialog: () => void;
 }
 export function DataTable<TData, TValue>({
   title,
@@ -42,6 +43,7 @@ export function DataTable<TData, TValue>({
   data,
   isLoading,
   dialog,
+  deleteDialog,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -97,7 +99,8 @@ export function DataTable<TData, TValue>({
               <HiOutlinePlus />
               Add
             </Button>
-            <Button variant="outline">
+
+            <Button variant="outline" onClick={deleteDialog}>
               <MdDelete />
               Delete
             </Button>

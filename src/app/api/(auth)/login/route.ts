@@ -2,7 +2,6 @@ import { signIn } from "@/lib/firebase/service";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function POST(req: NextRequest) {
   const request: { email: string; password: string } = await req.json();
@@ -10,7 +9,8 @@ export async function POST(req: NextRequest) {
   const JWT_SECRET =
     process.env.NEXT_PUBLIC_JWT_SECRET ||
     "f4f8a8233cb5d780aceabdab02579f510abf945b97c75c3ea5c424b305917ae02fa05803b2d281c0792b18fd72ed40cb403fe0b46f5e1294b422f16d5b0d1964";
-  const JWT_EXPIRES_IN = "1h";
+  const JWT_EXPIRES_IN = "7d";
+  const COOKIE_MAX_AGE = 7 * 24 * 60 * 60; // 7 hari dalam detik
 
   const result = await signIn(request);
 
@@ -37,7 +37,6 @@ export async function POST(req: NextRequest) {
             email: result.email,
           },
           token: token,
-          redirect: `${BASE_URL}/admin/project`,
         },
         { status: 200 }
       );
@@ -46,7 +45,7 @@ export async function POST(req: NextRequest) {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production", // Cookie hanya bekerja di HTTPS pada production
         sameSite: "strict", // Mencegah CSRF
-        maxAge: 600 * 60, // 1 jam
+        maxAge: COOKIE_MAX_AGE,
         path: "/", // Cookie tersedia di seluruh aplikasi
       });
 

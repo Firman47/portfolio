@@ -3,6 +3,8 @@ import * as Yup from "yup";
 import { cookies } from "next/headers";
 import { validateToken } from "@/lib/validateToken";
 import { Blog, blogRepository } from "@/models/Blog";
+import { categoryRepository } from "@/models/Category";
+
 type statusBlog = "draft" | "published" | "deleted";
 
 const validate = Yup.object({
@@ -11,7 +13,7 @@ const validate = Yup.object({
   status: Yup.string()
     .oneOf(["draft", "published", "deleted"], "Invalid status")
     .required("status is required"),
-  category_id: Yup.string().required("category_id is required"),
+  category_id: Yup.array().required("category_id is required"),
   created_at: Yup.date().optional(),
   updated_at: Yup.date().optional(),
 }).noUnknown(true);
@@ -84,11 +86,27 @@ export async function POST(request: NextRequest) {
     const req = await request.json();
     await validate.validate(req, { abortEarly: false });
 
+    const notFoundCategory: string[] = [];
+    await Promise.all(
+      req.category_id.map(async (id: string) => {
+        const category = await categoryRepository().findById(id); // Menunggu hasil findById
+        if (!category) {
+          notFoundCategory.push(id);
+        }
+      })
+    );
+    if (notFoundCategory.length > 0) {
+      return NextResponse.json({
+        status: 404,
+        message: `Some category IDs not found: ${notFoundCategory.join(", ")}`,
+      });
+    }
     const newBlog = new Blog();
     newBlog.title = req.title as string;
     newBlog.slug = generateSlug(newBlog.title);
     newBlog.content = req.content as string;
     newBlog.status = req.status as statusBlog;
+    newBlog.category_id = req.category_id as string[];
     newBlog.created_at = new Date();
 
     const createdData = await repository.create(newBlog);
@@ -132,7 +150,7 @@ export async function PUT(request: NextRequest) {
       data.slug = generateSlug(data.title);
       data.content = req.content as string;
       data.status = req.status as statusBlog;
-      data.category_id = req.category_id as string;
+      data.category_id = req.category_id as string[];
       data.updated_at = new Date();
 
       const updatedData = await repository.update(data);

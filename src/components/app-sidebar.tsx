@@ -25,6 +25,11 @@ const data = {
       url: "/admin/blog",
       icon: Frame,
     },
+    {
+      title: "Category",
+      url: "/admin/category",
+      icon: Frame,
+    },
   ],
 };
 

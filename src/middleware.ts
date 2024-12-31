@@ -33,7 +33,8 @@ export async function middleware(request: NextRequest) {
   if (
     !authToken &&
     (request.nextUrl.pathname.startsWith("/admin/project") ||
-      request.nextUrl.pathname.startsWith("/admin/blog"))
+      request.nextUrl.pathname.startsWith("/admin/blog") ||
+      request.nextUrl.pathname.startsWith("/admin/category"))
   ) {
     return NextResponse.redirect(new URL("/login", request.url));
   }

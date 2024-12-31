@@ -7,8 +7,10 @@ export function Footer() {
   const pathname = usePathname();
   const hiddenNavBarPaths = [
     "/login",
+    "/admin/",
     "/admin/project",
     "/admin/blog",
+    "/admin/category",
     "/settings",
     "/profile",
   ];
