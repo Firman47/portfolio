@@ -22,7 +22,7 @@ export default function hero() {
       </Badge>
 
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight">
-        I’m <span className="text-primary">Firman anjing</span>, a Web Developer
+        I’m <span className="text-primary">Firman</span>, a Web Developer
         Crafting Unique and Engaging Digital Experiences.
       </h1>
 
