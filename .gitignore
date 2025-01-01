@@ -41,6 +41,3 @@ next-env.d.ts
 
 
 firestore.creds.json
-.env
-*.key
-*.pem
