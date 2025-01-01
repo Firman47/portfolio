@@ -21,7 +21,7 @@ import Document from "@tiptap/extension-document";
 import Placeholder from "@tiptap/extension-placeholder";
 
 import { Button } from "@/components/ui/button";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { TextSelection } from "@tiptap/pm/state";
 import { Input } from "@/components/ui/input";
 import {
@@ -61,13 +61,27 @@ import {
   LuHeading6,
 } from "react-icons/lu";
 
-export default function Editor() {
+interface EditorProps {
+  value: string;
+  onChange: (value: string) => void;
+  id?: string;
+  name?: string;
+}
+
+export default function Editor({ value, onChange, id, name }: EditorProps) {
   const [oDialog, setODialog] = useState<boolean>(false);
   const [url, setUrl] = useState<string>("");
   const selectionRef = useRef<TextSelection | null>(null);
   const [editingLink, setEditingLink] = useState<boolean>(false);
 
   const editor = useEditor({
+    content: value, // Isi awal editor
+    onUpdate: ({ editor }) => {
+      const updatedContent = editor.getHTML(); // Ambil nilai terbaru
+      if (onChange) {
+        onChange(updatedContent); // Panggil onChange dengan konten terbaru
+      }
+    },
     extensions: [
       StarterKit,
       Bold,
@@ -99,6 +113,13 @@ export default function Editor() {
       }),
     ],
   });
+
+  useEffect(() => {
+    // Sinkronisasi nilai jika `value` berubah secara eksternal
+    if (editor && value !== editor.getHTML()) {
+      editor.commands.setContent(value);
+    }
+  }, [value, editor]);
 
   const handleOpenDialog = () => {
     const currentLink = editor?.getAttributes("link").href;
@@ -213,6 +234,7 @@ export default function Editor() {
           onClick={() => editor?.chain().focus().undo().run()}
           variant="outline"
           size="icon"
+          type="button"
         >
           <FaUndoAlt />
         </Button>
@@ -220,6 +242,7 @@ export default function Editor() {
         <Button
           onClick={() => editor?.chain().focus().redo().run()}
           variant="outline"
+          type="button"
           size="icon"
         >
           <FaRedoAlt />
@@ -227,6 +250,7 @@ export default function Editor() {
 
         <Button
           size="icon"
+          type="button"
           variant={editor?.isActive("bold") ? "secondary" : "outline"}
           onClick={() => editor?.chain().focus().toggleBold().run()}
         >
@@ -235,6 +259,7 @@ export default function Editor() {
 
         <Button
           size="icon"
+          type="button"
           variant={editor?.isActive("italic") ? "secondary" : "outline"}
           onClick={() => editor?.chain().focus().toggleItalic().run()}
         >
@@ -243,6 +268,7 @@ export default function Editor() {
 
         <Button
           size="icon"
+          type="button"
           variant={editor?.isActive("underline") ? "secondary" : "outline"}
           onClick={() => editor?.chain().focus().toggleUnderline().run()}
         >
@@ -251,6 +277,7 @@ export default function Editor() {
 
         <Button
           size="icon"
+          type="button"
           variant={editor?.isActive("bulletList") ? "secondary" : "outline"}
           onClick={() => editor?.chain().focus().toggleBulletList().run()}
         >
@@ -259,6 +286,7 @@ export default function Editor() {
 
         <Button
           size="icon"
+          type="button"
           variant={editor?.isActive("orderedList") ? "secondary" : "outline"}
           onClick={() => editor?.chain().focus().toggleOrderedList().run()}
         >
@@ -267,6 +295,7 @@ export default function Editor() {
 
         <Button
           size="icon"
+          type="button"
           variant={"outline"}
           onClick={handleOpenDialog}
           disabled={editor?.state.selection?.empty} // Cek apakah seleksi kosong
@@ -279,7 +308,7 @@ export default function Editor() {
           <FaLink className="h-4 w-4" />
         </Button>
 
-        <Button size="icon" variant="outline">
+        <Button size="icon" variant="outline" type="button">
           <label className="inline-flex items-center justify-center cursor-pointer">
             <input type="file" onChange={handleFileUpload} className="hidden" />
             <FaImage className="h-4 w-4" />
@@ -401,7 +430,13 @@ export default function Editor() {
         </DropdownMenu>
       </div>
 
-      <EditorContent editor={editor} />
+      <EditorContent
+        editor={editor}
+        value={value}
+        onChange={() => onChange}
+        id={id}
+        name={name}
+      />
     </div>
   );
 }

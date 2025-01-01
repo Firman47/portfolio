@@ -1,77 +1,141 @@
-import Editor from "@/components/editor";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+"use client";
+
+import { useEffect, useState } from "react";
+import { DataTable } from "@/components/data-table/data-table";
+import { columns } from "./columns";
+import { DELETE, get } from "@/utils/blog";
+import { BlogType } from "./types";
+import FormInput from "./form";
+import Loading from "@/components/ui/loading";
+
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import MultipleSelector, { Option } from "@/components/ui/multiple-selector";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function Page() {
-  const OPTIONS: Option[] = [
-    { label: "nextjs", value: "Nextjs" },
-    { label: "Vite", value: "vite" },
-    { label: "Nuxt", value: "nuxt" },
-    { label: "Vue", value: "vue, " },
-    { label: "Remix", value: "remix" },
-    { label: "Svelte", value: "svelte" },
-    { label: "Angular", value: "angular", disable: true },
-    { label: "Ember", value: "ember", disable: true },
-    { label: "React", value: "react" },
-    { label: "Gatsby", value: "gatsby", disable: true },
-    { label: "Astro", value: "astro", disable: true },
-  ];
+  const [data, setData] = useState<BlogType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingDelete, setLoadingDelete] = useState<boolean>(false);
+  const [dialog, setDialog] = useState(false);
+  const [editId, setEditId] = useState<string>("");
+  const [deleteId, setDeleteId] = useState<string[]>([]);
+  const [deleteDialog, setDeleteDialog] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+
+      try {
+        const response = await get();
+        const result = response.data.map((item: BlogType, index: number) => ({
+          no: index + 1,
+          ...item,
+        }));
+        setData(result);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const dialogClose = () => {
+    setDialog(false);
+    setEditId(""); // Reset editId saat dialog ditutup
+  };
+
+  const addBlog = (blog: BlogType, isUpdate = false) => {
+    setData((prevCategories) =>
+      isUpdate
+        ? prevCategories.map((existingBlog) =>
+            existingBlog.id === blog.id
+              ? {
+                  ...blog,
+                  no: prevCategories.findIndex((cat) => cat.id === blog.id) + 1,
+                }
+              : existingBlog
+          )
+        : [...prevCategories, { ...blog, no: prevCategories.length + 1 }]
+    );
+  };
+
+  const deleteHandler = async (id: string[]) => {
+    try {
+      setLoadingDelete(true);
+      await DELETE(id);
+      setData((prevData) => prevData.filter((item) => !id.includes(item.id)));
+    } catch (error) {
+      console.error("Error deleting data:", error);
+    } finally {
+      setLoadingDelete(false);
+    }
+  };
 
   return (
-    <div>
-      <Dialog>
-        <DialogTrigger>Open</DialogTrigger>
-        <DialogContent className="min-w-[60vw]">
-          <DialogHeader>
-            <DialogTitle>Create Blog</DialogTitle>
-          </DialogHeader>
+    <div className="container mx-auto py-4">
+      <DataTable
+        title="Table Blog"
+        columns={columns(setDialog, setEditId, setDeleteId, setDeleteDialog)}
+        data={data}
+        isLoading={loading}
+        dialog={() => setDialog(true)}
+        deleteDialog={() => setDeleteDialog(deleteId.length > 0 ? true : false)}
+      />
 
-          <div className="space-y-4">
-            <div className="flex w-full gap-4">
-              <div className="w-full">
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  placeholder="Project Name"
-                  type="text"
-                  className="w-full"
-                  required
-                />
-              </div>
+      <FormInput
+        dialogOpen={dialog}
+        dialogClose={() => dialogClose()}
+        addBlog={addBlog}
+        editId={editId}
+      />
 
-              <div className="w-full">
-                <Label htmlFor="name">Category</Label>
-                <MultipleSelector
-                  defaultOptions={OPTIONS}
-                  placeholder={"Select Category"}
-                  emptyIndicator={
-                    <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
-                      no results found.
-                    </p>
-                  }
-                />
-              </div>
-            </div>
+      <AlertDialog
+        open={deleteDialog}
+        onOpenChange={() => {
+          setDeleteDialog(false);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Are you sure you want to delete this?
+            </AlertDialogTitle>
 
-            <Editor />
-          </div>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              blog and remove all related data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
 
-          <DialogFooter>
-            <Button variant={"secondary"}>Draft</Button>
-            <Button>Publish</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setDeleteDialog(false);
+              }}
+            >
+              Cancel
+            </AlertDialogCancel>
+
+            <AlertDialogAction
+              onClick={() => deleteHandler(deleteId)}
+              className="bg-red-600 text-white hover:bg-red-700"
+            >
+              {loadingDelete ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Loading open={loadingDelete} />
     </div>
   );
 }
