@@ -62,6 +62,7 @@ export default function Page() {
                 />
               </div>
             </div>
+
             <Editor />
           </div>
 

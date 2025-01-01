@@ -71,15 +71,26 @@ export const columns: (
   },
 
   {
+    accessorKey: "no",
+    header: ({ column }) => (
+      <DataTableColumnHeader
+        column={column}
+        title="No"
+        className="flex justify-center"
+      />
+    ),
+  },
+
+  {
     id: "actions",
     header: "Action",
     cell: ({ row }) => {
       const rowData = row.original;
       return (
-        <div className="w-28">
+        <div className="space-x-2">
           <Button
             size="icon"
-            variant="link"
+            variant="ghost"
             onClick={() => {
               setDialog(true);
               setEditId(rowData.id);
@@ -90,10 +101,9 @@ export const columns: (
 
           <Button
             size="icon"
-            variant="link"
+            variant="ghost"
             onClick={() => {
               setDeleteId((prevIds) => {
-                // Jangan menambah ID yang sudah ada
                 if (!prevIds.includes(rowData.id)) {
                   return [...prevIds, rowData.id];
                 }
@@ -112,7 +122,11 @@ export const columns: (
   {
     accessorKey: "name",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Name" />
+      <DataTableColumnHeader
+        column={column}
+        title="Name"
+        className="flex justify-center"
+      />
     ),
   },
 ];

@@ -18,6 +18,17 @@ const validate = Yup.object({
   updated_at: Yup.date().optional(),
 }).noUnknown(true);
 
+const validateUpdate = Yup.object({
+  name: Yup.string().required("Project name is required"),
+  description: Yup.string().required("Description is required"),
+  image: Yup.string().optional(),
+  tech_stack: Yup.string().required("Tech stack is required"),
+  project_url: Yup.string().url("Invalid URL").optional(),
+  repository_url: Yup.string().url("Invalid URL").optional(),
+  created_at: Yup.date().optional(),
+  updated_at: Yup.date().optional(),
+}).noUnknown(true);
+
 const repository = projectRepository();
 
 export async function GET(req: NextRequest) {
@@ -138,27 +149,30 @@ export async function PUT(request: NextRequest) {
     req.forEach((value, key) => {
       formDataToObject[key] = value;
     });
-    await validate.validate(formDataToObject, { abortEarly: false });
+    await validateUpdate.validate(formDataToObject, { abortEarly: false });
 
     const file = req.get("image") as File;
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const filename = Date.now() + file.name.replaceAll(" ", "_");
+    let filename: string | null = null;
 
-    const oldImage = req.get("old_image") as string | undefined;
-    if (oldImage) {
-      const oldImagePath = path.join(process.cwd(), "public/file", oldImage);
-      fs.exists(oldImagePath, (exists) => {
-        if (exists) {
-          fs.unlink(oldImagePath, (err) => {
-            if (err) {
-              console.error("Error deleting old file:", err);
-            } else {
-              console.log("Old file deleted successfully");
-            }
-          });
-        }
-      });
-    } else {
+    if (file) {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      filename = Date.now() + file.name.replaceAll(" ", "_");
+
+      const oldImage = req.get("old_image") as string | undefined;
+      if (oldImage) {
+        const oldImagePath = path.join(process.cwd(), "public/file", oldImage);
+        fs.exists(oldImagePath, (exists) => {
+          if (exists) {
+            fs.unlink(oldImagePath, (err) => {
+              if (err) {
+                console.error("Error deleting old file:", err);
+              } else {
+                console.log("Old file deleted successfully");
+              }
+            });
+          }
+        });
+      }
       await writeFile(
         path.join(process.cwd(), "public/file", filename),
         buffer
@@ -169,7 +183,7 @@ export async function PUT(request: NextRequest) {
     if (data) {
       data.name = req.get("name") as string;
       data.description = req.get("description") as string;
-      data.image = filename as string;
+      data.image = filename || data.image;
       data.tech_stack = JSON.parse(req.get("tech_stack") as string);
       data.project_url = req.get("project_url") as string;
       data.repository_url = req.get("repository_url") as string;

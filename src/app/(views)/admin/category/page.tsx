@@ -6,6 +6,8 @@ import { columns } from "./columns";
 import { DELETE, get } from "@/utils/category";
 import { CategoryType } from "./types";
 import FormInput from "./form";
+import Loading from "@/components/ui/loading";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,11 +22,33 @@ import {
 export default function Page() {
   const [data, setData] = useState<CategoryType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingDelete, setLoadingDelete] = useState<boolean>(false);
   const [dialog, setDialog] = useState(false);
   const [editId, setEditId] = useState<string>("");
-  const [deleteId, seDeleteId] = useState<string[]>([]);
+  const [deleteId, setDeleteId] = useState<string[]>([]);
   const [deleteDialog, setDeleteDialog] = useState(false);
-  const [loadingDelete, setLoadingDelete] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+
+      try {
+        const response = await get();
+        const result = response.data.map(
+          (item: CategoryType, index: number) => ({
+            no: index + 1,
+            ...item,
+          })
+        );
+        setData(result);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const dialogClose = () => {
     setDialog(false);
@@ -32,21 +56,24 @@ export default function Page() {
   };
 
   const addCategory = (category: CategoryType, isUpdate = false) => {
-    if (isUpdate) {
-      setData((prevCategories) =>
-        prevCategories.map((existingCategory) =>
-          existingCategory.id === category.id ? category : existingCategory
-        )
-      );
-    } else {
-      setData((prevCategories) => [...prevCategories, category]);
-    }
+    setData((prevCategories) =>
+      isUpdate
+        ? prevCategories.map((existingCategory) =>
+            existingCategory.id === category.id
+              ? {
+                  ...category,
+                  no:
+                    prevCategories.findIndex((cat) => cat.id === category.id) +
+                    1,
+                }
+              : existingCategory
+          )
+        : [...prevCategories, { ...category, no: prevCategories.length + 1 }]
+    );
   };
 
   const deleteHandler = async (id: string[]) => {
     try {
-      console.log("cek id delete ", deleteId);
-
       setLoadingDelete(true);
       await DELETE(id);
       setData((prevData) => prevData.filter((item) => !id.includes(item.id)));
@@ -57,26 +84,11 @@ export default function Page() {
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-
-      try {
-        const response = await get();
-        setData(response.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
   return (
     <div className="container mx-auto py-4">
       <DataTable
         title="Table Project"
-        columns={columns(setDialog, setEditId, seDeleteId, setDeleteDialog)}
+        columns={columns(setDialog, setEditId, setDeleteId, setDeleteDialog)}
         data={data}
         isLoading={loading}
         dialog={() => setDialog(true)}
@@ -126,6 +138,8 @@ export default function Page() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Loading open={loadingDelete} />
     </div>
   );
 }

@@ -2,38 +2,45 @@
 
 import { useEffect, useState } from "react";
 import { DataTable } from "@/components/data-table/data-table";
-import { columns as columnsTemplate } from "./columns";
-import { FaEdit } from "react-icons/fa";
-import { Row } from "@tanstack/react-table";
-import CreateProjectDialog from "./crate";
-import EditProjectDialog from "./edit";
-import { Button } from "@/components/ui/button";
-import { MdDelete } from "react-icons/md";
-import DeleteProjectDialog from "./delete";
-import { Projects } from "./types";
+import { columns } from "./columns";
+import { DELETE, get } from "@/utils/project";
+import { ProjectType } from "./types";
+import FormInput from "./form";
+import Loading from "@/components/ui/loading";
 
-const Project = () => {
-  const [data, setData] = useState<Projects[]>([]);
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+export default function Page() {
+  const [data, setData] = useState<ProjectType[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<Projects | null>(null);
+  const [loadingDelete, setLoadingDelete] = useState<boolean>(false);
+  const [dialog, setDialog] = useState(false);
+  const [editId, setEditId] = useState<string>("");
+  const [deleteId, setDeleteId] = useState<string[]>([]);
+  const [deleteDialog, setDeleteDialog] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
-
     const fetchData = async () => {
+      setLoading(true);
+
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        const response = await fetch(`${apiUrl}/api/project`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        const result = await response.json();
-        setData(result.data as Projects[]);
+        const response = await get();
+        const result = response.data.map(
+          (item: ProjectType, index: number) => ({
+            no: index + 1,
+            ...item,
+          })
+        );
+        setData(result);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -43,93 +50,96 @@ const Project = () => {
     fetchData();
   }, []);
 
-  const handleCreate = (newProject: Projects) => setData([...data, newProject]);
+  const dialogClose = () => {
+    setDialog(false);
+    setEditId(""); // Reset editId saat dialog ditutup
+  };
 
-  const handleUpdate = (updatedProject: Projects) =>
-    setData(
-      data.map((proj) =>
-        proj.id === updatedProject.id ? updatedProject : proj
-      )
+  const addProject = (project: ProjectType, isUpdate = false) => {
+    setData((prevCategories) =>
+      isUpdate
+        ? prevCategories.map((existingProject) =>
+            existingProject.id === project.id
+              ? {
+                  ...project,
+                  no:
+                    prevCategories.findIndex((cat) => cat.id === project.id) +
+                    1,
+                }
+              : existingProject
+          )
+        : [...prevCategories, { ...project, no: prevCategories.length + 1 }]
     );
-
-  const handleEdit = (project: Projects) => {
-    setSelectedProject(project);
-    setIsEditDialogOpen(true);
   };
 
-  const handleDelete = (project: Projects) => {
-    setSelectedProject(project);
-    setIsDeleteDialogOpen(true);
+  const deleteHandler = async (id: string[]) => {
+    try {
+      setLoadingDelete(true);
+      await DELETE(id);
+      setData((prevData) => prevData.filter((item) => !id.includes(item.id)));
+    } catch (error) {
+      console.error("Error deleting data:", error);
+    } finally {
+      setLoadingDelete(false);
+    }
   };
-
-  const handleHapus = (deletedProject: Projects) => {
-    setData(data.filter((proj) => proj.id !== deletedProject.id));
-  };
-
-  const columns = columnsTemplate.map((column) =>
-    column.id === "actions"
-      ? {
-          ...column,
-          cell: ({ row }: { row: Row<Projects> }) => (
-            <div className="w-28">
-              <Button
-                size="icon"
-                variant="link"
-                onClick={() => handleEdit(row.original)}
-              >
-                <FaEdit />
-              </Button>
-
-              <Button
-                size="icon"
-                variant="link"
-                onClick={() => handleDelete(row.original)}
-              >
-                <MdDelete />
-              </Button>
-            </div>
-          ),
-        }
-      : column
-  );
 
   return (
-    <>
-      <div className="container mx-auto py-4">
-        <DataTable
-          title="Table Project"
-          columns={columns}
-          data={data}
-          isLoading={loading}
-          dialog={() => setIsCreateDialogOpen(true)}
-        />
-      </div>
-
-      <CreateProjectDialog
-        isOpen={isCreateDialogOpen}
-        onClose={() => setIsCreateDialogOpen(false)}
-        onCreate={handleCreate}
+    <div className="container mx-auto py-4">
+      <DataTable
+        title="Table Project"
+        columns={columns(setDialog, setEditId, setDeleteId, setDeleteDialog)}
+        data={data}
+        isLoading={loading}
+        dialog={() => setDialog(true)}
+        deleteDialog={() => setDeleteDialog(deleteId.length > 0 ? true : false)}
       />
 
-      {selectedProject && (
-        <>
-          <DeleteProjectDialog
-            isOpen={isDeleteDialogOpen}
-            project={selectedProject}
-            onDelete={handleHapus}
-            onClose={() => setIsDeleteDialogOpen(false)}
-          />
+      <FormInput
+        dialogOpen={dialog}
+        dialogClose={() => dialogClose()}
+        addProject={addProject}
+        editId={editId}
+      />
 
-          <EditProjectDialog
-            isOpen={isEditDialogOpen}
-            onClose={() => setIsEditDialogOpen(false)}
-            project={selectedProject}
-            onUpdate={handleUpdate}
-          />
-        </>
-      )}
-    </>
+      <AlertDialog
+        open={deleteDialog}
+        onOpenChange={() => {
+          setDeleteDialog(false);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Are you sure you want to delete this?
+            </AlertDialogTitle>
+
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              project and remove all related data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setDeleteDialog(false);
+              }}
+            >
+              Cancel
+            </AlertDialogCancel>
+
+            <AlertDialogAction
+              onClick={() => deleteHandler(deleteId)}
+              className="bg-red-600 text-white hover:bg-red-700"
+            >
+              {loadingDelete ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Loading open={loadingDelete} />
+    </div>
   );
-};
-
-export default Project;
+}

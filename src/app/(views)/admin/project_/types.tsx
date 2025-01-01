@@ -1,9 +1,9 @@
-export interface ProjectType {
+export interface Projects {
   id: string;
   name: string;
   description: string;
-  image: string;
-  tech_stack: string[];
+  image_url: string;
+  tech_stack: Array<string>;
   project_url: string;
   repository_url: string;
 }

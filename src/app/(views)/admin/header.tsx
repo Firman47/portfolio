@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import { TbLogout2 } from "react-icons/tb";
 import { IoSettingsSharp } from "react-icons/io5";
 import { buttonVariants } from "@/components/ui/button";
-
+import Loading from "@/components/ui/loading";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,7 +29,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
 
 interface User {
   name: string;
@@ -39,7 +38,8 @@ export default function Header() {
   const router = useRouter();
   const [storedValue, setStoredValue] = useState<User | null>();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isLoading, setisLoading] = useState(false);
+  const [isLoading, setisLoading] = useState<boolean>(false);
+
   useEffect(() => {
     const value = localStorage.getItem("data");
     if (value) {
@@ -141,18 +141,7 @@ export default function Header() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={isLoading}>
-        <AlertDialogContent className="max-w-fit">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-center flex justify-center items-center">
-              Tunggu sebentar...
-            </AlertDialogTitle>
-            <AlertDialogDescription className="flex justify-center items-center">
-              <Loader2 className="animate-spin h-16 w-16" />
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-        </AlertDialogContent>
-      </AlertDialog>
+      <Loading open={isLoading} />
     </header>
   );
 }
