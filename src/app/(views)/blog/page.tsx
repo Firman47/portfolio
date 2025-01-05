@@ -4,7 +4,6 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FiArrowRight } from "react-icons/fi";
-import Loading from "@/components/ui/loading";
 import {
   Pagination,
   PaginationContent,
@@ -19,8 +18,7 @@ import { BlogType } from "../admin/blog/types";
 import { CategoryType } from "../admin/category/types";
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import SkeletonBLog from "./skeleton";
 

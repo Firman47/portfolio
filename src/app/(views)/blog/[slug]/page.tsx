@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BlogType } from "../../admin/blog/types";
 import { getBySlug } from "@/utils/home/blog";
 import { CategoryType } from "../../admin/category/types";
@@ -9,8 +9,6 @@ import { get as getCategory } from "@/utils/home/category";
 import { ChevronLeftIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { FaShare } from "react-icons/fa";
-import { CiShare2 } from "react-icons/ci";
 import SkeletonBlogDetail from "./skeleton";
 import ShareBlogButton from "./share";
 
