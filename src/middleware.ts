@@ -25,6 +25,10 @@ export async function middleware(request: NextRequest) {
     });
   }
 
+  if (request.nextUrl.pathname === "/") {
+    return NextResponse.redirect(new URL("/home", request.url));
+  }
+
   const authToken = request.cookies.get("auth_token");
   if (authToken && request.nextUrl.pathname === "/login") {
     return NextResponse.redirect(new URL("/admin/project", request.url));

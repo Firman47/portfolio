@@ -11,6 +11,7 @@ import {
   ColumnDef,
   ColumnFiltersState,
   SortingState,
+  Table as TableType,
   VisibilityState,
   flexRender,
   getCoreRowModel,
@@ -36,7 +37,9 @@ interface DataTableProps<TData, TValue> {
   isLoading: boolean;
   dialog: () => void;
   deleteDialog: () => void;
+  setTableInstance?: (table: TableType<TData>) => void;
 }
+
 export function DataTable<TData, TValue>({
   title,
   columns,
@@ -44,6 +47,7 @@ export function DataTable<TData, TValue>({
   isLoading,
   dialog,
   deleteDialog,
+  setTableInstance,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -74,6 +78,12 @@ export function DataTable<TData, TValue>({
       globalFilter,
     },
   });
+
+  React.useEffect(() => {
+    if (setTableInstance) {
+      setTableInstance(table); // Passing instance of table
+    }
+  }, [table, setTableInstance]);
 
   return (
     <>

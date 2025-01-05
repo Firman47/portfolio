@@ -18,6 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Table } from "@tanstack/react-table";
 
 export default function Page() {
   const [data, setData] = useState<ProjectType[]>([]);
@@ -27,6 +28,10 @@ export default function Page() {
   const [editId, setEditId] = useState<string>("");
   const [deleteId, setDeleteId] = useState<string[]>([]);
   const [deleteDialog, setDeleteDialog] = useState(false);
+  const [deleteIdAction, setDeleteIdAction] = useState<string[]>([]);
+  const [tableInstance, setTableInstance] = useState<Table<ProjectType> | null>(
+    null
+  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -72,11 +77,32 @@ export default function Page() {
     );
   };
 
-  const deleteHandler = async (id: string[]) => {
+  const resetSelection = (table: Table<ProjectType>) => {
+    table.getRowModel().rows.forEach((row) => {
+      row.toggleSelected(false); // Uncheck semua checkbox
+    });
+  };
+
+  const deleteHandler = async () => {
+    if (!tableInstance) return;
+
     try {
       setLoadingDelete(true);
+
+      const id = deleteId.length > 0 ? deleteId : deleteIdAction;
       await DELETE(id);
-      setData((prevData) => prevData.filter((item) => !id.includes(item.id)));
+
+      setData((prevData) => {
+        const updatedData = prevData.filter((item) => !id.includes(item.id));
+        return updatedData.map((item, index) => ({
+          ...item,
+          no: index + 1,
+        }));
+      });
+
+      setDeleteId([]);
+      setDeleteIdAction([]);
+      resetSelection(tableInstance);
     } catch (error) {
       console.error("Error deleting data:", error);
     } finally {
@@ -88,11 +114,20 @@ export default function Page() {
     <div className="container mx-auto py-4">
       <DataTable
         title="Table Project"
-        columns={columns(setDialog, setEditId, setDeleteId, setDeleteDialog)}
+        columns={columns(
+          setDialog,
+          setEditId,
+          setDeleteId,
+          setDeleteIdAction,
+          setDeleteDialog
+        )}
         data={data}
         isLoading={loading}
         dialog={() => setDialog(true)}
         deleteDialog={() => setDeleteDialog(deleteId.length > 0 ? true : false)}
+        setTableInstance={(table: Table<ProjectType>) =>
+          setTableInstance(table)
+        }
       />
 
       <FormInput
@@ -123,6 +158,7 @@ export default function Page() {
           <AlertDialogFooter>
             <AlertDialogCancel
               onClick={() => {
+                setDeleteIdAction([]);
                 setDeleteDialog(false);
               }}
             >
@@ -130,7 +166,7 @@ export default function Page() {
             </AlertDialogCancel>
 
             <AlertDialogAction
-              onClick={() => deleteHandler(deleteId)}
+              onClick={() => deleteHandler()}
               className="bg-red-600 text-white hover:bg-red-700"
             >
               {loadingDelete ? "Deleting..." : "Delete"}

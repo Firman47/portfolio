@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
-}
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -83,26 +79,24 @@ body {
     @apply border-border;
   }
   body {
+    font-family: Arial, Helvetica, sans-serif;
     @apply bg-background text-foreground overflow-x-hidden;
   }
 }
 
-.ProseMirror {
-  @apply min-h-40 border rounded-md shadow-sm bg-background p-2;
-}
-.ProseMirror:focus {
+.tiptap:focus {
   outline: none;
 }
 
-.ProseMirror ul {
+.tiptap ul {
   list-style-type: disc; /* Untuk BulletList */
 }
 
-.ProseMirror ol {
+.tiptap ol {
   list-style-type: decimal; /* Untuk OrderedList */
 }
 
-.ProseMirror li {
+.tiptap li {
   margin-left: 1.5rem;
 }
 

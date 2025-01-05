@@ -18,6 +18,7 @@ import { get } from "@/utils/category";
 import { CategoryType } from "../category/types";
 import Editor from "@/components/editor";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
 
 interface FormInputProps {
   dialogOpen: boolean;
@@ -42,6 +43,7 @@ const FormInput: React.FC<FormInputProps> = ({
     id: "",
     title: "",
     content: "",
+    description: "",
     status: "draft",
     category_id: [],
   });
@@ -69,6 +71,7 @@ const FormInput: React.FC<FormInputProps> = ({
         id: "",
         title: "",
         content: "",
+        description: "",
         status: "draft",
         category_id: [],
       });
@@ -98,18 +101,20 @@ const FormInput: React.FC<FormInputProps> = ({
     fetchCategory();
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement> | Option[]) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | Option[]
+  ) => {
     if (Array.isArray(e)) {
-      // Mengatur array string dari nilai MultipleSelector
+      // Ketika nilai berupa array dari dropdown atau multi-select
       setFormData((prevData) => ({
         ...prevData,
-        category_id: e.map((option) => option.value), // Ubah menjadi array string
+        category_id: e.map((option) => option.value),
       }));
     } else {
-      const { name, value, files } = e.target;
+      const { name, value, files } = e.target as HTMLInputElement; // Perlu cast ke HTMLInputElement untuk mendukung file input
       setFormData((prevData) => ({
         ...prevData,
-        [name]: files && files.length > 0 ? files[0] : value,
+        [name]: files && files.length > 0 ? files[0] : value, // Jika ada file, simpan file. Jika tidak, simpan value
       }));
     }
   };
@@ -123,6 +128,7 @@ const FormInput: React.FC<FormInputProps> = ({
         id: editId || "",
         title: formData.title,
         content: formData.content,
+        description: formData.description,
         status: statusBlog, // Gunakan statusBlog untuk memastikan status diatur dari user input
         category_id: formData.category_id,
       };
@@ -147,7 +153,7 @@ const FormInput: React.FC<FormInputProps> = ({
 
   return (
     <Dialog open={dialogOpen} onOpenChange={dialogClose}>
-      <DialogContent className="p-0">
+      <DialogContent className="p-0 min-w-[840px]">
         <ScrollArea className=" max-h-[96vh] w-full ">
           <form onSubmit={formAction} className="space-y-4 px-6 py-4">
             <DialogHeader>
@@ -168,20 +174,19 @@ const FormInput: React.FC<FormInputProps> = ({
                 />
               </div>
 
-              <Editor
-                id="content"
-                name="content"
-                value={formData.content}
-                onChange={
-                  (updatedContent) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      content: updatedContent,
-                    })) // Perbarui content di state
-                }
-              />
+              <div className="space-y-2">
+                <Label htmlFor="name">Blog Sescription</Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  placeholder="Blog description"
+                  required
+                />
+              </div>
 
-              <div className="w-full">
+              <div className="space-y-2">
                 <Label htmlFor="name">Category</Label>
                 <MultipleSelector
                   defaultOptions={category}
@@ -204,6 +209,18 @@ const FormInput: React.FC<FormInputProps> = ({
                   }
                 />
               </div>
+
+              <Editor
+                id="content"
+                name="content"
+                value={formData.content}
+                onChange={(updatedContent) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    content: updatedContent,
+                  }))
+                }
+              />
             </div>
 
             <DialogFooter>

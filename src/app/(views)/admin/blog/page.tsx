@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { DataTable } from "@/components/data-table/data-table";
 import { columns } from "./columns";
 import { DELETE, get } from "@/utils/blog";
+import { get as getCategory } from "@/utils/category";
 import { BlogType } from "./types";
 import FormInput from "./form";
 import Loading from "@/components/ui/loading";
+import { Table } from "@tanstack/react-table";
 
 import {
   AlertDialog,
@@ -18,6 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { CategoryType } from "../category/types";
 
 export default function Page() {
   const [data, setData] = useState<BlogType[]>([]);
@@ -26,7 +29,12 @@ export default function Page() {
   const [dialog, setDialog] = useState(false);
   const [editId, setEditId] = useState<string>("");
   const [deleteId, setDeleteId] = useState<string[]>([]);
+  const [deleteIdAction, setDeleteIdAction] = useState<string[]>([]);
   const [deleteDialog, setDeleteDialog] = useState(false);
+  const [dataCategory, setDataCategory] = useState<CategoryType[]>([]);
+  const [tableInstance, setTableInstance] = useState<Table<BlogType> | null>(
+    null
+  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,6 +47,9 @@ export default function Page() {
           ...item,
         }));
         setData(result);
+
+        const responseCategory = await getCategory();
+        setDataCategory(responseCategory.data);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -50,7 +61,7 @@ export default function Page() {
 
   const dialogClose = () => {
     setDialog(false);
-    setEditId(""); // Reset editId saat dialog ditutup
+    setEditId("");
   };
 
   const addBlog = (blog: BlogType, isUpdate = false) => {
@@ -68,11 +79,32 @@ export default function Page() {
     );
   };
 
-  const deleteHandler = async (id: string[]) => {
+  const resetSelection = (table: Table<BlogType>) => {
+    table.getRowModel().rows.forEach((row) => {
+      row.toggleSelected(false); // Uncheck semua checkbox
+    });
+  };
+
+  const deleteHandler = async () => {
+    if (!tableInstance) return;
+
     try {
       setLoadingDelete(true);
+
+      const id = deleteId.length > 0 ? deleteId : deleteIdAction;
       await DELETE(id);
-      setData((prevData) => prevData.filter((item) => !id.includes(item.id)));
+
+      setData((prevData) => {
+        const updatedData = prevData.filter((item) => !id.includes(item.id));
+        return updatedData.map((item, index) => ({
+          ...item,
+          no: index + 1,
+        }));
+      });
+
+      setDeleteId([]);
+      setDeleteIdAction([]);
+      resetSelection(tableInstance);
     } catch (error) {
       console.error("Error deleting data:", error);
     } finally {
@@ -84,10 +116,19 @@ export default function Page() {
     <div className="container mx-auto py-4">
       <DataTable
         title="Table Blog"
-        columns={columns(setDialog, setEditId, setDeleteId, setDeleteDialog)}
+        columns={columns(
+          setDialog,
+          setEditId,
+          deleteId,
+          setDeleteId,
+          setDeleteIdAction,
+          setDeleteDialog,
+          dataCategory
+        )}
         data={data}
         isLoading={loading}
         dialog={() => setDialog(true)}
+        setTableInstance={(table: Table<BlogType>) => setTableInstance(table)}
         deleteDialog={() => setDeleteDialog(deleteId.length > 0 ? true : false)}
       />
 
@@ -120,13 +161,14 @@ export default function Page() {
             <AlertDialogCancel
               onClick={() => {
                 setDeleteDialog(false);
+                setDeleteIdAction([]);
               }}
             >
               Cancel
             </AlertDialogCancel>
 
             <AlertDialogAction
-              onClick={() => deleteHandler(deleteId)}
+              onClick={() => deleteHandler()}
               className="bg-red-600 text-white hover:bg-red-700"
             >
               {loadingDelete ? "Deleting..." : "Delete"}

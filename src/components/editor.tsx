@@ -195,6 +195,12 @@ export default function Editor({ value, onChange, id, name }: EditorProps) {
 
   const headingLevels = [1, 2, 3, 4, 5, 6];
 
+  const isAlignmentActive =
+    editor?.isActive({ textAlign: "center" }) ||
+    editor?.isActive({ textAlign: "justify" }) ||
+    editor?.isActive({ textAlign: "left" }) ||
+    editor?.isActive({ textAlign: "right" });
+
   return (
     <div className="space-y-3">
       <Dialog open={oDialog} onOpenChange={setODialog}>
@@ -317,7 +323,10 @@ export default function Editor({ value, onChange, id, name }: EditorProps) {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon">
+            <Button
+              variant={isAlignmentActive ? "secondary" : "outline"}
+              size="icon"
+            >
               {editor?.isActive({ textAlign: "center" }) ? (
                 <FaAlignCenter />
               ) : editor?.isActive({ textAlign: "justify" }) ? (
@@ -431,6 +440,7 @@ export default function Editor({ value, onChange, id, name }: EditorProps) {
       </div>
 
       <EditorContent
+        className="min-h-40 border rounded-md shadow-sm bg-background p-2 focus:outline-none;"
         editor={editor}
         value={value}
         onChange={() => onChange}

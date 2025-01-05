@@ -14,5 +14,5 @@ export default function AOSWrapper({
     AOS.init({});
   }, []);
 
-  return <>{children}</>;
+  return <div className="overflow-x-hidden w-full">{children}</div>;
 }

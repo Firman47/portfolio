@@ -12,6 +12,7 @@ interface ColumnProps {
   setDialog: React.Dispatch<React.SetStateAction<boolean>>;
   setEditId: React.Dispatch<React.SetStateAction<string>>;
   setDeleteId: React.Dispatch<React.SetStateAction<string[]>>;
+  setDeleteIdAction: React.Dispatch<React.SetStateAction<string[]>>;
   setDeleteDialog: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
@@ -19,11 +20,13 @@ export const columns: (
   setDialog: ColumnProps["setDialog"],
   setEditId: ColumnProps["setEditId"],
   setDeleteId: ColumnProps["setDeleteId"],
+  setDeleteIdAction: ColumnProps["setDeleteIdAction"],
   setDeleteDialog: ColumnProps["setDeleteDialog"]
 ) => ColumnDef<CategoryType>[] = (
   setDialog,
   setEditId,
   setDeleteId,
+  setDeleteIdAction,
   setDeleteDialog
 ) => [
   {
@@ -103,7 +106,7 @@ export const columns: (
             size="icon"
             variant="ghost"
             onClick={() => {
-              setDeleteId((prevIds) => {
+              setDeleteIdAction((prevIds) => {
                 if (!prevIds.includes(rowData.id)) {
                   return [...prevIds, rowData.id];
                 }

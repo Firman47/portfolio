@@ -12,6 +12,7 @@ export class Blog implements IEntity {
   content!: string;
   status!: status;
   category_id!: string[];
+  description!: string;
   created_at?: Date;
   updated_at?: Date;
   published_at?: Date;

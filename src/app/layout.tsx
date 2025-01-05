@@ -3,9 +3,6 @@ import localFont from "next/font/local";
 import "./globals.css";
 import "aos/dist/aos.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import NavBar from "@/components/navbar";
-import AOSWrapper from "@/components/aos";
-import { Footer } from "@/components/footer";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -43,9 +40,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <NavBar />
-          <AOSWrapper>{children}</AOSWrapper>
-          <Footer />
+          {children}
         </ThemeProvider>
       </body>
     </html>

@@ -13,6 +13,7 @@ const validate = Yup.object({
   status: Yup.string()
     .oneOf(["draft", "published", "deleted"], "Invalid status")
     .required("status is required"),
+  description: Yup.string().required("description  is required"),
   category_id: Yup.array().required("category_id is required"),
   created_at: Yup.date().optional(),
   updated_at: Yup.date().optional(),
@@ -20,14 +21,14 @@ const validate = Yup.object({
 
 const repository = blogRepository();
 
-function generateSlug(title: string): string {
-  return title
-    .toLowerCase() // Mengubah semua huruf menjadi kecil
-    .trim() // Menghapus spasi di awal dan akhir
-    .replace(/[^a-z0-9\s-]/g, "") // Menghapus karakter selain huruf, angka, spasi, atau tanda minus
-    .replace(/\s+/g, "-"); // Mengganti spasi dengan tanda minus
+function generateSlug(title: string, count: number = 0): string {
+  const baseSlug = title
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-");
+  return count > 0 ? `${baseSlug}-${count}` : baseSlug;
 }
-
 export async function GET(req: NextRequest) {
   try {
     const cookieStore = await cookies();
@@ -101,10 +102,20 @@ export async function POST(request: NextRequest) {
         message: `Some category IDs not found: ${notFoundCategory.join(", ")}`,
       });
     }
+
+    // Cek slug agar unik
+    let slug = generateSlug(req.title);
+    let attempt = 0;
+    while ((await repository.whereEqualTo("slug", slug).find()).length > 0) {
+      attempt++;
+      slug = generateSlug(req.title, attempt);
+    }
+
     const newBlog = new Blog();
     newBlog.title = req.title as string;
-    newBlog.slug = generateSlug(newBlog.title);
+    newBlog.slug = slug;
     newBlog.content = req.content as string;
+    newBlog.description = req.description as string;
     newBlog.status = req.status as statusBlog;
     newBlog.category_id = req.category_id as string[];
     newBlog.created_at = new Date();
@@ -145,10 +156,23 @@ export async function PUT(request: NextRequest) {
     await validate.validate(req, { abortEarly: false });
     const data = await repository.findById(req.id as string);
 
+    // Memeriksa dan menghasilkan slug yang unik
+    let slug = generateSlug(req.title);
+    let attempt = 0;
+    const originalSlug = data.slug; // Menyimpan slug asli untuk perbandingan
+    while (
+      (await repository.whereEqualTo("slug", slug).find()).length > 0 &&
+      slug !== originalSlug
+    ) {
+      attempt++;
+      slug = generateSlug(req.title, attempt);
+    }
+
     if (data) {
       data.title = req.title as string;
-      data.slug = generateSlug(data.title);
+      data.slug = slug;
       data.content = req.content as string;
+      data.description = req.description as string;
       data.status = req.status as statusBlog;
       data.category_id = req.category_id as string[];
       data.updated_at = new Date();
