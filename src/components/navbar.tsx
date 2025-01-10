@@ -14,6 +14,9 @@ import { Button } from "./ui/button";
 import { CgMenuLeft } from "react-icons/cg";
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
+import { ProfileDialog } from "./profile-dialog";
+import { signIn, useSession } from "next-auth/react";
+import Loading from "./ui/loading";
 
 export default function NavBar() {
   const links = [
@@ -25,13 +28,14 @@ export default function NavBar() {
 
   const [activeLink, setActiveLink] = useState("");
   const sectionsRef = useRef<{ [key: string]: HTMLElement | null }>({});
+
+  const { data: session, status } = useSession();
   useEffect(() => {
     // Simpan referensi untuk setiap section berdasarkan id
     links.forEach((link) => {
       sectionsRef.current[link.href] = document.querySelector(link.href);
     });
 
-    // Buat IntersectionObserver untuk memantau setiap section
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -49,11 +53,12 @@ export default function NavBar() {
     });
 
     return () => {
-      // Bersihkan observer saat komponen dilepas
       observer.disconnect();
     };
-  }, [links]);
+  });
+
   const pathname = usePathname();
+
   const hiddenNavBarPaths = [
     "/login",
     "/dashboard",
@@ -65,7 +70,13 @@ export default function NavBar() {
     "/profile",
   ];
 
+  console.log("ini isi session di navbar : ", session);
+
   const shouldShowNavBar = !hiddenNavBarPaths.includes(pathname);
+
+  if (status == "loading") {
+    return <Loading open={true} />;
+  }
 
   return (
     <>
@@ -127,7 +138,7 @@ export default function NavBar() {
                 </div>
               </SheetContent>
             </Sheet>
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center justify-center">
               <Button variant={"outline"} className="bg-black/0" size="icon">
                 <FaWhatsapp className="w-7 h-7" />
               </Button>
@@ -145,6 +156,19 @@ export default function NavBar() {
               </Button>
 
               <ModeToggle />
+
+              {session && status === "authenticated" ? (
+                <ProfileDialog />
+              ) : (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    signIn();
+                  }}
+                >
+                  Login
+                </Button>
+              )}
             </div>
           </div>
         </header>

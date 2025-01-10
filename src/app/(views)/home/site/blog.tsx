@@ -1,33 +1,42 @@
+"use client";
+
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FiArrowRight } from "react-icons/fi";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { BlogType } from "../../admin/blog/types";
 
-const Blogs = [
-  {
-    itle: "Lorem ipsum dolor sit amet consectetur.",
-    description:
-      " Lorem ipsum dolor sit, amet consectetur adipisicing elit. Maxime, ipsa. Lorem ipsum dolor sit, amet consectetur adipisicing elit. Maxime, ipsa.",
-    kategori: "Teknoologi",
-    date: "10 November 2024",
-  },
-  {
-    itle: "Lorem ipsum dolor sit amet consectetur.",
-    description:
-      " Lorem ipsum dolor sit, amet consectetur adipisicing elit. Maxime, ipsa. Lorem ipsum dolor sit, amet consectetur adipisicing elit. Maxime, ipsa.",
-    kategori: "Teknoologi",
-    date: "10 November 2024",
-  },
-  {
-    itle: "Lorem ipsum dolor sit amet consectetur.",
-    description:
-      " Lorem ipsum dolor sit, amet consectetur adipisicing elit. Maxime, ipsa. Lorem ipsum dolor sit, amet consectetur adipisicing elit. Maxime, ipsa.",
-    kategori: "Teknoologi",
-    date: "10 November 2024",
-  },
-];
+import { get as getBlog } from "@/utils/home/blog";
+import { get as getCategory } from "@/utils/home/category";
+import { CategoryType } from "../../admin/category/types";
+
 export const Blog = () => {
+  // const [loading, setLoading] = useState(false);
+  const [dataBlog, setDataBlog] = useState<BlogType[]>([]);
+  const [dataCategory, setDataCategory] = useState<CategoryType[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const responseBlog = await getBlog();
+        const responseCategory = await getCategory();
+        const paginationBlog = responseBlog.data.slice(0, 3);
+
+        // setLoading(true);
+        setDataBlog(paginationBlog);
+        setDataCategory(responseCategory.data);
+      } catch (err) {
+        console.log("message error : ", err);
+      } finally {
+        // setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <section
       id="blog"
@@ -50,9 +59,9 @@ export const Blog = () => {
       </div>
 
       <div className="flex gap-2 flex-wrap justify-center items-center">
-        {Blogs.map((item, index) => (
+        {dataBlog.map((item, index) => (
           <Card
-            className="w-[350px] p-4 space-y-2  text-start"
+            className="w-[350px] p-4 flex flex-col gap-2  text-start"
             key={index}
             data-aos="fade-left"
             data-aos-duration="700"
@@ -60,20 +69,38 @@ export const Blog = () => {
             data-aos-once="false"
           >
             <div className="flex gap-2">
-              <p className="text-sm text-muted-foreground">{item.date}</p>
-              <Badge variant="outline">{item.kategori}</Badge>
+              <p className="text-sm text-muted-foreground">
+                {item.created_at ? (
+                  new Date(item.created_at).toLocaleDateString()
+                ) : (
+                  <></>
+                )}
+              </p>
+
+              {item.category_id.map((category_id) => {
+                const category = dataCategory.find(
+                  (cat) => cat.id === category_id
+                );
+                return (
+                  <Badge variant="outline" key={category_id}>
+                    {category?.name}
+                  </Badge>
+                );
+              })}
             </div>
 
-            <h1 className="text-xl font-semibold">{item.itle}</h1>
+            <h1 className="text-xl font-semibold">{item.title}</h1>
 
             <p className="text-base text-muted-foreground">
               {item.description}
             </p>
 
-            <Button variant="default" size="sm">
-              Learn More
-              <FiArrowRight />
-            </Button>
+            <Link href={`/blog/${item.slug}`}>
+              <Button variant="secondary" size="sm">
+                Learn More
+                <FiArrowRight />
+              </Button>
+            </Link>
           </Card>
         ))}
       </div>

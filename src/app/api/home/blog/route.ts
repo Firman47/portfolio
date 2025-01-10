@@ -9,7 +9,10 @@ export async function GET(req: NextRequest) {
     const slug = searchParams.get("slug");
 
     if (slug) {
-      const detailBlog = await repository.whereEqualTo("slug", slug).find();
+      const detailBlog = await repository
+        .whereEqualTo("slug", slug)
+        .whereEqualTo("status", "publish")
+        .find();
 
       if (detailBlog) {
         return NextResponse.json({
@@ -24,7 +27,7 @@ export async function GET(req: NextRequest) {
         });
       }
     } else {
-      const data = await repository.find();
+      const data = await repository.whereEqualTo("status", "published").find();
       return NextResponse.json({ status: 200, message: "Success", data });
     }
   } catch (error) {

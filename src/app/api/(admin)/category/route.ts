@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as Yup from "yup";
-import { cookies } from "next/headers";
-import { validateToken } from "@/lib/validateToken";
 import { Category, categoryRepository } from "@/models/Category";
 
 const validate = Yup.object({
@@ -12,17 +10,6 @@ const repository = categoryRepository();
 
 export async function GET(req: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("auth_token")?.value;
-    if (!token) {
-      return NextResponse.json(
-        { status: 401, message: "User not authenticated" },
-        { status: 401 }
-      );
-    } else {
-      await validateToken(token);
-    }
-
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
 
@@ -54,17 +41,6 @@ export async function GET(req: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("auth_token")?.value;
-    if (!token) {
-      return NextResponse.json(
-        { status: 401, message: "User not authenticated" },
-        { status: 401 }
-      );
-    } else {
-      await validateToken(token);
-    }
-
     const req = await request.json();
     await validate.validate(req, { abortEarly: false });
 
@@ -93,17 +69,6 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("auth_token")?.value;
-    if (!token) {
-      return NextResponse.json(
-        { status: 401, message: "User not authenticated" },
-        { status: 401 }
-      );
-    } else {
-      await validateToken(token);
-    }
-
     const req = await request.json();
     await validate.validate(req, { abortEarly: false });
     const data = await repository.findById(req.id as string);
@@ -139,17 +104,6 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("auth_token")?.value;
-    if (!token) {
-      return NextResponse.json(
-        { status: 401, message: "User not authenticated" },
-        { status: 401 }
-      );
-    } else {
-      await validateToken(token);
-    }
-
     const req = await request.json();
 
     if (!Array.isArray(req.id) || req.id.length === 0) {

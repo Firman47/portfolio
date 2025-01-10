@@ -19,11 +19,12 @@ import Text from "@tiptap/extension-text";
 import TextAlign from "@tiptap/extension-text-align";
 import Document from "@tiptap/extension-document";
 import Placeholder from "@tiptap/extension-placeholder";
-
 import { Button } from "@/components/ui/button";
 import { useState, useRef, useEffect } from "react";
 import { TextSelection } from "@tiptap/pm/state";
 import { Input } from "@/components/ui/input";
+import HardBreak from "@tiptap/extension-hard-break";
+
 import {
   FaBold,
   FaItalic,
@@ -101,7 +102,7 @@ export default function Editor({ value, onChange, id, name }: EditorProps) {
       Document,
       Paragraph,
       Text,
-
+      HardBreak,
       TextAlign.configure({
         types: ["heading", "paragraph"],
       }),

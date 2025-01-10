@@ -108,6 +108,11 @@
   pointer-events: none;
 }
 
+.tiptap p:empty::before {
+  content: "";
+  display: inline-block;
+  margin-top: 1rem;
+}
 .tiptap h1 {
   font-size: 2rem; /* Heading yang menonjol */
 }

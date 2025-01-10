@@ -37,6 +37,8 @@ export default function Page() {
   );
 
   useEffect(() => {
+    // 'loading', 'authenticated', atau 'unauthenticated'
+
     const fetchData = async () => {
       setLoading(true);
 

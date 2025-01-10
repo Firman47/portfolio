@@ -26,14 +26,6 @@ export default function hero() {
         Crafting Unique and Engaging Digital Experiences.
       </h1>
 
-      <p>
-        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Doloremque
-        dolorem aperiam dolore asperiores accusamus nisi deleniti soluta
-        mollitia, sapiente sit reprehenderit quibusdam culpa quae possimus
-        praesentium sunt aliquam porro, perferendis expedita quod minus repellat
-        exercitationem?
-      </p>
-
       <div className="flex gap-4">
         <Button>See My Work</Button>
         <Button variant={"outline"}>Contact Me</Button>
