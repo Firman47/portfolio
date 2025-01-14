@@ -27,6 +27,7 @@ function generateSlug(title: string, count: number = 0): string {
     .replace(/\s+/g, "-");
   return count > 0 ? `${baseSlug}-${count}` : baseSlug;
 }
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);

@@ -1,19 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FaHeart, FaComment, FaShare } from "react-icons/fa";
+// import { GetLike, GetLikeByUser, Like, LikeType } from "@/utils/action";
+import { useSession } from "next-auth/react";
+// import Loading from "@/components/ui/loading";
+import socket from "@/utils/socket";
 
-export default function Action({ title, url }: { title: string; url: string }) {
+export default function Action({
+  title,
+  url,
+  content_id,
+}: {
+  title: string;
+  url: string;
+  content_id: string;
+}) {
+  // const [loading, setLoading] = useState(false);
   const [isSharing, setIsSharing] = useState(false); // State untuk melacak status share
-  const [like, setLike] = useState(false);
+  const [likeButton, setLikeButton] = useState(false);
+  // const [likes, setLikes] = useState<LikeType[]>([]);
+  const [likesCount, setLikesCount] = useState(0);
+
+  const { data: session } = useSession();
 
   const handleShare = async () => {
     if (isSharing) {
       console.log("Share already in progress...");
-      return; // Jangan lanjutkan jika sedang dalam proses share
+      return;
     }
-    setIsSharing(true); // Tandai bahwa proses share sedang berlangsung
+    setIsSharing(true);
 
     if (navigator.share) {
       try {
@@ -33,18 +50,71 @@ export default function Action({ title, url }: { title: string; url: string }) {
     }
   };
 
+  const likeHandler = async () => {
+    if (!session || !session.user) {
+      console.warn("User not logged in!");
+      return;
+    }
+
+    socket.emit("like_action", {
+      user_id: session.user.id,
+      content_id,
+      content_type: "blog", // Sesuaikan dengan tipe konten Anda
+    });
+  };
+
+  useEffect(() => {
+    console.log("Like Button State Updated:", likeButton);
+  }, [likeButton]);
+
+  useEffect(() => {
+    if (!session || !session.user) {
+      console.warn("User not logged in!");
+      return;
+    }
+
+    const fetchLikes = () => {
+      socket.emit("get_initial_likes", {
+        user_id: session.user.id,
+        content_id,
+        content_type: "blog",
+      });
+    };
+
+    fetchLikes();
+
+    socket.on("likes_updated", (item) => {
+      if (item.content_id === content_id) {
+        setLikesCount(item.data.length);
+        setLikeButton(item.likedByUser);
+      }
+    });
+
+    socket.on("initial_likes", (item) => {
+      if (item.content_id === content_id) {
+        setLikesCount(item.data.length);
+        setLikeButton(item.likedByUser);
+      }
+    });
+
+    return () => {
+      socket.off("likes_updated");
+      socket.off("initial_likes");
+    };
+  }, [content_id, session]);
+
   return (
     <div className="flex justify-center gap-4">
       <div className="flex items-center justify-center gap-2">
         <Button
-          variant={like ? "secondary" : "outline"}
-          onClick={() => setLike(!like)}
+          variant={likeButton ? "secondary" : "outline"}
+          onClick={() => likeHandler()}
           size={"icon"}
           className="flex items-center"
         >
           <FaHeart />
         </Button>
-        <span className="text-sm text-muted-foreground">100</span>
+        <span className="text-sm text-muted-foreground">{likesCount}</span>
       </div>
 
       <div className="flex items-center justify-center gap-2">
@@ -57,6 +127,8 @@ export default function Action({ title, url }: { title: string; url: string }) {
       <Button variant={"outline"} size={"icon"} onClick={handleShare}>
         <FaShare />
       </Button>
+
+      {/* <Loading open={loading} /> */}
     </div>
   );
 }

@@ -11,9 +11,10 @@ import { BlogType } from "../../admin/blog/types";
 import { get as getBlog } from "@/utils/home/blog";
 import { get as getCategory } from "@/utils/home/category";
 import { CategoryType } from "../../admin/category/types";
+import { SkeletonBLog } from "./skeleton";
 
 export const Blog = () => {
-  // const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [dataBlog, setDataBlog] = useState<BlogType[]>([]);
   const [dataCategory, setDataCategory] = useState<CategoryType[]>([]);
 
@@ -24,19 +25,21 @@ export const Blog = () => {
         const responseCategory = await getCategory();
         const paginationBlog = responseBlog.data.slice(0, 3);
 
-        // setLoading(true);
+        setLoading(true);
         setDataBlog(paginationBlog);
         setDataCategory(responseCategory.data);
       } catch (err) {
         console.log("message error : ", err);
       } finally {
-        // setLoading(false);
+        setLoading(false);
       }
     };
 
     fetchData();
   }, []);
-
+  if (loading) {
+    return <SkeletonBLog />;
+  }
   return (
     <section
       id="blog"
@@ -57,7 +60,6 @@ export const Blog = () => {
           </p>
         </div>
       </div>
-
       <div className="flex gap-2 flex-wrap justify-center items-center">
         {dataBlog.map((item, index) => (
           <Card
@@ -104,7 +106,6 @@ export const Blog = () => {
           </Card>
         ))}
       </div>
-
       <Link
         href="/blog"
         data-aos="fade-up"

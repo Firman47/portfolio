@@ -70,7 +70,7 @@ export default function NavBar() {
     "/profile",
   ];
 
-  console.log("ini isi session di navbar : ", session);
+  // console.log("ini isi session di navbar : ", session);
 
   const shouldShowNavBar = !hiddenNavBarPaths.includes(pathname);
 

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { get as getCategory } from "@/utils/home/category";
 import SkeletonBlogDetail from "./skeleton";
 import Action from "./action";
+
 interface BlogProps {
   params: Promise<{ slug: string }>;
 }
@@ -15,14 +16,17 @@ interface BlogProps {
 export default function BlogDetail({ params }: BlogProps) {
   const [data, setData] = useState<BlogType | null>(null);
   const [dataCategory, setDataCategory] = useState<CategoryType[]>([]);
+  const [isSlugInitialized, setIsSlugInitialized] = useState(false);
   const [loading, setLoading] = useState(false);
   const url = process.env.NEXT_PUBLIC_API_URL;
 
   const [slug, setSlug] = useState<string>("");
+
   useEffect(() => {
     const fetchParams = async () => {
       const resolvedParams = await params;
-      setSlug(resolvedParams.slug); // Simpan slug ketika resolved
+      setSlug(resolvedParams.slug);
+      setIsSlugInitialized(true);
     };
 
     fetchParams();
@@ -30,14 +34,17 @@ export default function BlogDetail({ params }: BlogProps) {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        setLoading(true);
-        const response = await getBySlug(slug); // Ambil data blog
-        const responseCategory = await getCategory(); // Ambil kategori
+      setLoading(true);
 
-        console.log("Data blog:", response.data);
-        setData(response.data[0]); // Update state dengan data blog
-        setDataCategory(responseCategory.data); // Update state dengan kategori
+      try {
+        if (!isSlugInitialized || !slug || slug === "") {
+          return;
+        }
+        const response = await getBySlug(slug);
+        const responseCategory = await getCategory();
+
+        setData(response.data);
+        setDataCategory(responseCategory.data);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -46,7 +53,7 @@ export default function BlogDetail({ params }: BlogProps) {
     };
 
     fetchData();
-  }, [slug]); // Hanya jalankan fetchData jika slug berubah
+  }, [slug, isSlugInitialized]);
 
   if (loading) {
     return <SkeletonBlogDetail />;
@@ -84,12 +91,13 @@ export default function BlogDetail({ params }: BlogProps) {
       <Action
         title={data?.title as string}
         url={url && data ? url + "/blog/" + data?.slug : ("" as string)}
+        content_id={data?.id as string}
       />
 
       <div
         className="tiptap w-full "
         dangerouslySetInnerHTML={{
-          __html: data?.content.replace(/<br>/g, "<br />") || "",
+          __html: data?.content || "",
         }}
       />
     </div>

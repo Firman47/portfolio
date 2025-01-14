@@ -11,8 +11,8 @@ export async function GET(req: NextRequest) {
     if (slug) {
       const detailBlog = await repository
         .whereEqualTo("slug", slug)
-        .whereEqualTo("status", "publish")
-        .find();
+        .whereEqualTo("status", "published")
+        .findOne();
 
       if (detailBlog) {
         return NextResponse.json({

@@ -15,4 +15,4 @@ export class Like implements IEntity {
   published_at?: Date;
 }
 
-export const blogRepository = () => getRepository(Like);
+export const likeRepository = () => getRepository(Like);
