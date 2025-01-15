@@ -9,7 +9,7 @@ import {
   resendVerification,
   verificationEmail,
 } from "@/utils/auth";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Loading from "@/components/ui/loading";
 import { Button } from "@/components/ui/button";
 
@@ -23,11 +23,16 @@ export default function VerficationPage() {
   const [loading, setLoading] = useState(false);
   const [timer, setTimer] = useState(0);
   const [statusVerifiction, setStatusVerifiction] = useState(false);
+  const [email, setEmail] = useState<string | null>(null);
+  const [code, setCode] = useState<string | null>(null);
 
-  const searchParams = useSearchParams();
-  const email = searchParams.get("email");
-  const code = searchParams.get("code");
   const router = useRouter();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setEmail(params.get("email"));
+    setCode(params.get("code"));
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
