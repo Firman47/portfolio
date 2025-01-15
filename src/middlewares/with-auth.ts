@@ -49,6 +49,7 @@ export default function withAuth(
     }
 
     const pathname = req.nextUrl.pathname;
+
     const token = await getToken({
       req,
       secret: process.env.NEXT_PUBLIC_JWT_SECRET,
@@ -57,7 +58,7 @@ export default function withAuth(
     if (
       pathname.startsWith("/_next/") ||
       pathname.startsWith("/static/") ||
-      pathname.startsWith("/api/auth/") // Menambahkan pengecekan ini untuk API auth NextAuth
+      pathname.startsWith("/api/auth/signup") // Menamahkan pengecekan ini untuk API auth NextAuth
     ) {
       return NextResponse.next(); // Lewati middleware untuk permintaan ke _next, static, atau /api/auth/
     }
@@ -90,17 +91,16 @@ export default function withAuth(
       }
     }
 
+    // Redirect user setelah login ke halaman yang sesuai
     if (pathname === "/auth/signin" || pathname === "/auth/signup") {
       if (token) {
-        if (token.role === "admin") {
-          const url = new URL("/admin/project", req.url);
-          url.searchParams.set("callbackUrl", encodeURI(req.url));
-          return NextResponse.redirect(url);
-        } else {
-          const url = new URL("/home", req.url);
-          url.searchParams.set("callbackUrl", encodeURI(req.url));
-          return NextResponse.redirect(url);
-        }
+        const url =
+          token.role === "admin"
+            ? new URL("/admin/project", req.url)
+            : new URL("/home", req.url);
+
+        url.searchParams.set("callbackUrl", encodeURIComponent(req.url));
+        return NextResponse.redirect(url);
       }
     }
 
@@ -117,9 +117,6 @@ export default function withAuth(
       url.searchParams.set("callbackUrl", encodeURI(req.url));
       return NextResponse.redirect(url);
     }
-    console.log("Decoded Token:", decodedToken);
-    console.log("Current Path:", pathname);
-    console.log("Token:", token);
 
     return middleware(req);
   };

@@ -7,6 +7,7 @@ import { FaHeart, FaComment, FaShare } from "react-icons/fa";
 import { useSession } from "next-auth/react";
 // import Loading from "@/components/ui/loading";
 import socket from "@/utils/socket";
+import Loading from "@/components/ui/loading";
 
 export default function Action({
   title,
@@ -17,7 +18,7 @@ export default function Action({
   url: string;
   content_id: string;
 }) {
-  // const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [isSharing, setIsSharing] = useState(false); // State untuk melacak status share
   const [likeButton, setLikeButton] = useState(false);
   // const [likes, setLikes] = useState<LikeType[]>([]);
@@ -51,21 +52,23 @@ export default function Action({
   };
 
   const likeHandler = async () => {
-    if (!session || !session.user) {
-      console.warn("User not logged in!");
-      return;
+    try {
+      setLoading(true);
+
+      if (!session || !session.user) {
+        console.warn("User not logged in!");
+        return;
+      }
+
+      socket.emit("like_action", {
+        user_id: session.user.id,
+        content_id,
+        content_type: "blog", // Sesuaikan dengan tipe konten Anda
+      });
+    } catch (error) {
+      console.error("Error like hendler blog:", error);
     }
-
-    socket.emit("like_action", {
-      user_id: session.user.id,
-      content_id,
-      content_type: "blog", // Sesuaikan dengan tipe konten Anda
-    });
   };
-
-  useEffect(() => {
-    console.log("Like Button State Updated:", likeButton);
-  }, [likeButton]);
 
   useEffect(() => {
     if (!session || !session.user) {
@@ -74,11 +77,18 @@ export default function Action({
     }
 
     const fetchLikes = () => {
-      socket.emit("get_initial_likes", {
-        user_id: session.user.id,
-        content_id,
-        content_type: "blog",
-      });
+      try {
+        setLoading(true);
+
+        socket.emit("get_initial_likes", {
+          user_id: session.user.id,
+          content_id,
+          content_type: "blog",
+        });
+      } catch (error) {
+        console.error("Error get_initial_likes blog:", error);
+        setLoading(false);
+      }
     };
 
     fetchLikes();
@@ -87,6 +97,7 @@ export default function Action({
       if (item.content_id === content_id) {
         setLikesCount(item.data.length);
         setLikeButton(item.likedByUser);
+        setLoading(false);
       }
     });
 
@@ -94,6 +105,7 @@ export default function Action({
       if (item.content_id === content_id) {
         setLikesCount(item.data.length);
         setLikeButton(item.likedByUser);
+        setLoading(false);
       }
     });
 
@@ -128,7 +140,7 @@ export default function Action({
         <FaShare />
       </Button>
 
-      {/* <Loading open={loading} /> */}
+      <Loading open={loading} />
     </div>
   );
 }
