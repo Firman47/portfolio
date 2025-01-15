@@ -117,6 +117,9 @@ export default function withAuth(
       url.searchParams.set("callbackUrl", encodeURI(req.url));
       return NextResponse.redirect(url);
     }
+    console.log("Decoded Token:", decodedToken);
+    console.log("Current Path:", pathname);
+    console.log("Token:", token);
 
     return middleware(req);
   };
