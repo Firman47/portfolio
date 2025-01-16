@@ -1,5 +1,5 @@
 import axios from "axios";
-const url = `${process.env.NEXT_PUBLIC_API_URL_REAL_TIME}/api`;
+const url = `${process.env.NEXT_PUBLIC_API_URL}/api/action`;
 
 type content_type = "blog" | "project";
 
@@ -9,10 +9,18 @@ export interface LikeType {
   content_type: content_type;
 }
 
-export interface getLikeType {
-  content_id: string;
-  content_type: content_type;
-}
+export const GetLike = async (req: LikeType) => {
+  try {
+    const response = await axios.get(
+      `${url}/like?user_id=${req.user_id}&content_id=${req.content_id}&content_type=${req.content_type}`
+    );
+    console.log("API Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error occurred:", error);
+    throw error;
+  }
+};
 
 export const Like = async (req: LikeType) => {
   try {
@@ -28,17 +36,6 @@ export const Like = async (req: LikeType) => {
 export const GetLikeByUser = async (req: LikeType) => {
   try {
     const response = await axios.post(`${url}/getLikeByUser`, req);
-    console.log("API Response:", response.data);
-    return response.data;
-  } catch (error) {
-    console.error("Error occurred:", error);
-    throw error;
-  }
-};
-
-export const GetLike = async (req: getLikeType) => {
-  try {
-    const response = await axios.post(`${url}/getLike`, req);
     console.log("API Response:", response.data);
     return response.data;
   } catch (error) {

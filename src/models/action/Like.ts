@@ -12,7 +12,6 @@ export class Like implements IEntity {
   content_type!: content_type;
   created_at?: Date;
   updated_at?: Date;
-  published_at?: Date;
 }
 
 export const likeRepository = () => getRepository(Like);

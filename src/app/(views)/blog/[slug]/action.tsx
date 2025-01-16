@@ -6,8 +6,16 @@ import { FaHeart, FaComment, FaShare } from "react-icons/fa";
 // import { GetLike, GetLikeByUser, Like, LikeType } from "@/utils/action";
 import { useSession } from "next-auth/react";
 // import Loading from "@/components/ui/loading";
-import socket from "@/utils/socket";
 import Loading from "@/components/ui/loading";
+import { GetLike, Like } from "@/utils/action";
+import { ablyChannelLike } from "@/lib/ably";
+import { InboundMessage } from "ably";
+
+interface LikeUpdate {
+  content_id: string;
+  likes: number;
+  likedByUser: boolean;
+}
 
 export default function Action({
   title,
@@ -60,13 +68,25 @@ export default function Action({
         return;
       }
 
-      socket.emit("like_action", {
+      const response = await Like({
         user_id: session.user.id,
         content_id,
-        content_type: "blog", // Sesuaikan dengan tipe konten Anda
+        content_type: "blog",
       });
+
+      if (response) {
+        if (Array.isArray(response.data)) {
+          setLikesCount(response.data.length); // Mengakses panjang array jika data adalah array
+        } else {
+          console.error("Response data is not an array:", response.data);
+        }
+
+        setLikeButton(response.likedByUser);
+      }
     } catch (error) {
       console.error("Error like hendler blog:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -76,42 +96,47 @@ export default function Action({
       return;
     }
 
-    const fetchLikes = () => {
-      try {
-        setLoading(true);
+    const fetchData = async () => {
+      setLoading(true);
 
-        socket.emit("get_initial_likes", {
+      try {
+        const response = await GetLike({
           user_id: session.user.id,
           content_id,
           content_type: "blog",
         });
+
+        if (response) {
+          if (Array.isArray(response.data)) {
+            setLikesCount(response.data.length); // Mengakses panjang array jika data adalah array
+          } else {
+            console.error("Response data is not an array:", response.data);
+          }
+
+          setLikeButton(response.likedByUser); // Set initial like status
+        }
       } catch (error) {
-        console.error("Error get_initial_likes blog:", error);
+        console.error("Error fetching likes data:", error);
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchLikes();
+    fetchData();
 
-    socket.on("likes_updated", (item) => {
+    const handleLikesUpdate = (message: InboundMessage) => {
+      const item: LikeUpdate = message.data as LikeUpdate;
       if (item.content_id === content_id) {
-        setLikesCount(item.data.length);
+        setLikesCount(item.likes);
         setLikeButton(item.likedByUser);
         setLoading(false);
       }
-    });
+    };
 
-    socket.on("initial_likes", (item) => {
-      if (item.content_id === content_id) {
-        setLikesCount(item.data.length);
-        setLikeButton(item.likedByUser);
-        setLoading(false);
-      }
-    });
+    ablyChannelLike.subscribe("update", handleLikesUpdate);
 
     return () => {
-      socket.off("likes_updated");
-      socket.off("initial_likes");
+      ablyChannelLike.unsubscribe("update", handleLikesUpdate);
     };
   }, [content_id, session]);
 

@@ -39,7 +39,7 @@ export default function withAuth(
       try {
         const { payload } = await jwtVerify(
           registerToken,
-          new TextEncoder().encode(process.env.NEXT_PUBLIC_JWT_SECRET)
+          new TextEncoder().encode(process.env.JWT_SECRET)
         );
         decodedToken = payload;
       } catch (error) {
@@ -52,13 +52,15 @@ export default function withAuth(
 
     const token = await getToken({
       req,
-      secret: process.env.NEXT_PUBLIC_JWT_SECRET,
+      secret: process.env.JWT_SECRET,
     });
+
+    console.log("isi token : ", token);
 
     if (
       pathname.startsWith("/_next/") ||
       pathname.startsWith("/static/") ||
-      pathname.startsWith("/api/auth/signup") // Menamahkan pengecekan ini untuk API auth NextAuth
+      pathname.startsWith("/api/auth")
     ) {
       return NextResponse.next(); // Lewati middleware untuk permintaan ke _next, static, atau /api/auth/
     }

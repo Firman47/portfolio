@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
 
     const verificationToken = jwt.sign(
       { email: email },
-      process.env.NEXT_PUBLIC_JWT_SECRET as string,
+      process.env.JWT_SECRET as string,
       { expiresIn: "5m" }
     );
 

@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
 
     const verificationToken = jwt.sign(
       { email: req.email },
-      process.env.NEXT_PUBLIC_JWT_SECRET as string,
+      process.env.JWT_SECRET as string,
       { expiresIn: "5m" }
     );
 
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
         email: createdUser.email,
         username: createdUser.username,
       },
-      process.env.NEXT_PUBLIC_JWT_SECRET as string,
+      process.env.JWT_SECRET as string,
       { expiresIn: "7d" } // Token berlaku selama 7 hari
     );
 
@@ -161,7 +161,7 @@ export async function PUT(request: NextRequest) {
     try {
       decoded = jwt.verify(
         code as string,
-        process.env.NEXT_PUBLIC_JWT_SECRET as string
+        process.env.JWT_SECRET as string
       ) as JwtPayload;
     } catch (error) {
       return NextResponse.json({

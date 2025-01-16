@@ -15,7 +15,7 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt", // Gunakan JWT untuk session
   },
 
-  secret: process.env.NEXT_PUBLIC_JWT_SECRET || "fallback-secret", // Secret JWT
+  secret: process.env.JWT_SECRET || "fallback-secret", // Secret JWT
 
   providers: [
     CredentialsProvider({
@@ -181,6 +181,7 @@ export const authOptions: NextAuthOptions = {
 
         session.user = {
           ...session.user,
+          id: updatedUserFromDB?.id as string,
           image: updatedUserFromDB?.image as string,
           role: updatedUserFromDB?.role as string,
           verificationStatus: updatedUserFromDB?.verificationStatus as string,
