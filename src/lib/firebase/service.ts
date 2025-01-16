@@ -11,7 +11,7 @@ import {
   where,
 } from "firebase/firestore";
 import bcrypt from "bcrypt";
-import app from "./init"; // Pastikan app sudah di-inisialisasi dengan benar
+import { app } from "./init"; // Pastikan app sudah di-inisialisasi dengan benar
 
 const firestore = getFirestore(app);
 
