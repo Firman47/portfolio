@@ -55,8 +55,6 @@ export default function withAuth(
       secret: process.env.JWT_SECRET,
     });
 
-    console.log("isi token : ", token);
-
     if (
       pathname.startsWith("/_next/") ||
       pathname.startsWith("/static/") ||

@@ -3,7 +3,7 @@ import * as Yup from "yup";
 import { Like, likeRepository } from "@/models/action/Like";
 import { blogRepository } from "@/models/Blog";
 import { userRepository } from "@/models/User";
-import ably from "@/lib/ably";
+import ablyClient from "@/lib/ably";
 
 const repository = likeRepository();
 const validate = Yup.object({
@@ -58,7 +58,11 @@ export async function POST(request: NextRequest) {
         .whereEqualTo("content_type", content_type)
         .find();
 
-      likedByUser = false;
+      likedByUser = await repository
+        .whereEqualTo("user_id", user_id)
+        .whereEqualTo("content_id", content_id)
+        .whereEqualTo("content_type", content_type)
+        .findOne();
     } else {
       const newLike = new Like();
       newLike.user_id = user_id;
@@ -73,15 +77,19 @@ export async function POST(request: NextRequest) {
         .whereEqualTo("content_type", content_type)
         .find();
 
-      likedByUser = true;
+      likedByUser = await repository
+        .whereEqualTo("user_id", user_id)
+        .whereEqualTo("content_id", content_id)
+        .whereEqualTo("content_type", content_type)
+        .findOne();
     }
 
-    const channel = ably.channels.get("likes");
+    const channel = ablyClient.channels.get("likes");
     channel.publish("update", {
       content_id,
       content_type,
-      likes: allData.length,
-      likedByUser,
+      data: allData,
+      likedByUser: likedByUser?.user_id,
     });
 
     return NextResponse.json(
@@ -91,7 +99,7 @@ export async function POST(request: NextRequest) {
           : "Like berhasil dihapus",
         data: allData,
         content_id,
-        likedByUser,
+        likedByUser: likedByUser?.user_id,
       },
       { status: likedByUser ? 201 : 200 }
     );
@@ -149,12 +157,12 @@ export async function GET(request: NextRequest) {
       .whereEqualTo("content_type", content_type)
       .find();
 
-    const channel = ably.channels.get("likes");
+    const channel = ablyClient.channels.get("likes");
     channel.publish("update", {
       content_id,
       content_type,
-      likes: allData.length,
-      likedByUser: userData ? true : false,
+      data: allData,
+      likedByUser: userData?.user_id,
     });
 
     return NextResponse.json(
@@ -162,7 +170,7 @@ export async function GET(request: NextRequest) {
         message: "Like berhasil ditemukan",
         data: allData,
         content_id,
-        likedByUser: userData ? true : false,
+        likedByUser: userData?.user_id,
       },
       { status: 200 }
     );
@@ -174,200 +182,3 @@ export async function GET(request: NextRequest) {
     );
   }
 }
-// export const addLike = async (
-//   req: Request,
-//   res: Response,
-//   io: Server
-// ): Promise<void> => {
-//   const { user_id, content_id, content_type } = req.body;
-
-//   const validContentTypes: ("blog" | "project")[] = ["blog", "project"];
-
-//   if (!validContentTypes.includes(content_type)) {
-//     res.status(400).json({ message: "Invalid content_type" });
-//     return;
-//   }
-
-//   if (!user_id || !content_id || !content_type) {
-//     res
-//       .status(400)
-//       .json({ message: "user_id, content_id, and content_type are required" });
-//     return;
-//   }
-
-//   try {
-//     const cekBLog = await blogRepository()
-//       .whereEqualTo("id", content_id)
-//       .findOne();
-//     if (!cekBLog) {
-//       res
-//         .status(404)
-//         .json({ message: "Blog ID tidak ditemukan. Harap periksa kembali." });
-//       return;
-//     }
-
-//     const cekUser = await userRepository()
-//       .whereNotEqualTo("id", user_id)
-//       .findOne();
-//     if (!cekUser) {
-//       res
-//         .status(404)
-//         .json({ message: "User ID tidak ditemukan. Harap periksa kembali." });
-//       return;
-//     }
-
-//     const data = await repository
-//       .whereEqualTo("content_type", content_type)
-//       .whereEqualTo("content_id", content_id)
-//       .whereEqualTo("user_id", user_id)
-//       .findOne();
-
-//     if (data) {
-//       await repository.delete(data.id);
-
-//       res.status(201).json({ message: "Like berhasil dihapus" });
-//     } else {
-//       const newLike = new Like();
-//       newLike.user_id = user_id;
-//       newLike.content_id = content_id;
-//       newLike.content_type = content_type; // Sudah type-safe
-//       newLike.created_at = new Date();
-
-//       // Menyimpan data like ke database
-//       const createdData = await repository.create(newLike);
-
-//       res
-//         .status(200)
-//         .json({ message: "Like berhasil ditambahkan", data: createdData });
-//     }
-//   } catch (err) {
-//     console.error(err);
-//     res
-//       .status(500)
-//       .json({ message: "Terjadi kesalahan saat menyimpan like", error: err });
-//   }
-// };
-
-// export const getAll = async (
-//   req: Request,
-//   res: Response,
-//   io: Server
-// ): Promise<void> => {
-//   try {
-//     const { content_id, content_type } = req.body;
-
-//     const validContentTypes: ("blog" | "project")[] = ["blog", "project"];
-
-//     if (!validContentTypes.includes(content_type)) {
-//       res.status(400).json({ message: "Invalid content_type" });
-//       return;
-//     }
-
-//     if (!content_id || !content_type) {
-//       res.status(400).json({
-//         message: " content_id, and content_type are required",
-//       });
-//       return;
-//     }
-
-//     const cekBLog = await blogRepository()
-//       .whereEqualTo("id", content_id)
-//       .findOne();
-//     if (!cekBLog) {
-//       res
-//         .status(404)
-//         .json({ message: "Blog ID tidak ditemukan. Harap periksa kembali." });
-//       return;
-//     }
-
-//     const data = await repository
-//       .whereEqualTo("content_type", content_type)
-//       .whereEqualTo("content_id", content_id)
-//       .find();
-
-//     if (data) {
-//       const likesUpdatePayload = {
-//         content_id,
-//         content_type,
-//         updatedLikes: data,
-//       };
-//       io.emit("likes_updated", likesUpdatePayload);
-
-//       res
-//         .status(200)
-//         .json({ message: "Like berhasil ditampilkan", data: data });
-//     } else {
-//       res.status(200).json({ message: "like tidak ditemukan" });
-//     }
-//   } catch (err) {
-//     console.error(err);
-//     res
-//       .status(500)
-//       .json({ message: "Terjadi kesalahan saat menyimpan like", error: err });
-//   }
-// };
-
-// export const getByUser = async (
-//   req: Request,
-//   res: Response,
-//   io: Server
-// ): Promise<void> => {
-//   try {
-//     const { user_id, content_id, content_type } = req.body;
-
-//     const validContentTypes: ("blog" | "project")[] = ["blog", "project"];
-
-//     if (!validContentTypes.includes(content_type)) {
-//       res.status(400).json({ message: "Invalid content_type" });
-//       return;
-//     }
-
-//     if (!user_id || !content_id || !content_type) {
-//       res.status(400).json({
-//         message: "user_id, content_id, and content_type are required",
-//       });
-//       return;
-//     }
-
-//     const cekBLog = await blogRepository()
-//       .whereEqualTo("id", content_id)
-//       .findOne();
-//     if (!cekBLog) {
-//       res
-//         .status(404)
-//         .json({ message: "Blog ID tidak ditemukan. Harap periksa kembali." });
-//       return;
-//     }
-
-//     const cekUser = await userRepository()
-//       .whereNotEqualTo("id", user_id)
-//       .findOne();
-//     if (!cekUser) {
-//       res
-//         .status(404)
-//         .json({ message: "User ID tidak ditemukan. Harap periksa kembali." });
-//       return;
-//     }
-
-//     const data = await repository
-//       .whereEqualTo("content_type", content_type)
-//       .whereEqualTo("content_id", content_id)
-//       .whereEqualTo("user_id", user_id)
-//       .find();
-
-//     if (data) {
-//       io.emit("likes_updated", data);
-
-//       res
-//         .status(200)
-//         .json({ message: "Like berhasil ditampilkan", data: data });
-//     } else {
-//       res.status(200).json({ message: "like tidak ditemukan" });
-//     }
-//   } catch (err) {
-//     console.error(err);
-//     res
-//       .status(500)
-//       .json({ message: "Terjadi kesalahan saat menyimpan like", error: err });
-//   }
-// };

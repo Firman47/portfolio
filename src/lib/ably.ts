@@ -1,10 +1,9 @@
-// lib/ably.ts
-import { Realtime } from "ably";
-if (!process.env.NEXT_PUBLIC_ABLY_API_KEY) {
-  throw new Error("ABLY_API_KEY is not set in environment variables.");
-}
-const ably = new Realtime({ key: process.env.NEXT_PUBLIC_ABLY_API_KEY || "" });
+import Ably from "ably";
 
-export const ablyChannelLike = ably.channels.get("likes");
+const ablyClient = new Ably.Realtime(
+  process.env.NEXT_PUBLIC_ABLY_API_KEY || ""
+);
 
-export default ably;
+export const ablyChannelLike = ablyClient.channels.get("likes");
+
+export default ablyClient;

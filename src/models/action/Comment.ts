@@ -15,4 +15,4 @@ export class Comment implements IEntity {
   published_at?: Date;
 }
 
-export const blogRepository = () => getRepository(Comment);
+export const commentRepository = () => getRepository(Comment);

@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton"; // Ganti dengan import Skel
 const SkeletonBlogDetail = () => {
   return (
     <div className="container flex justify-center gap-6 px-4 lg:px-24 w-full">
-      <div className="w-[60%] space-y-4">
+      <div className=" space-y-4">
         {/* Skeleton for header buttons */}
         <div className="w-full flex justify-between">
           <Skeleton className="w-20 h-8" />
