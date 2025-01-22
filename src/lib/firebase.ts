@@ -14,7 +14,6 @@ if (!admin.apps.length) {
 }
 
 const firestore = admin.firestore();
-const database = admin.database();
 
 if (!isInitialized) {
   fireorm.initialize(firestore);
@@ -22,4 +21,4 @@ if (!isInitialized) {
   console.log("FireORM initialized.");
 }
 
-export { firestore, database };
+export { firestore };

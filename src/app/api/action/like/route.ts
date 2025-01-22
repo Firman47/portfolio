@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as Yup from "yup";
 import { Like, likeRepository } from "@/models/action/Like";
-import { blogRepository } from "@/models/Blog";
-import { userRepository } from "@/models/User";
 import ablyClient from "@/lib/ably";
 
 const repository = likeRepository();
@@ -10,7 +8,7 @@ const validate = Yup.object({
   user_id: Yup.string().required("user_id is required"),
   content_id: Yup.string().required("content_id  is required"),
   content_type: Yup.string()
-    .oneOf(["blog", "project"], "Invalid content_type")
+    .oneOf(["blog", "project", "comment"], "Invalid content_type")
     .required("content_type is required"),
 }).noUnknown(true);
 
@@ -20,26 +18,6 @@ export async function POST(request: NextRequest) {
 
     await validate.validate(req);
     const { user_id, content_id, content_type } = req;
-
-    const checkBlog = await blogRepository()
-      .whereEqualTo("id", content_id)
-      .findOne();
-    if (!checkBlog) {
-      return NextResponse.json({
-        status: false,
-        message: "Blog tidak ditemukan",
-      });
-    }
-
-    const cekUser = await userRepository()
-      .whereEqualTo("id", user_id)
-      .findOne();
-    if (!cekUser) {
-      return NextResponse.json({
-        status: false,
-        message: "User tidak ditemukan",
-      });
-    }
 
     const likeExist = await repository
       .whereEqualTo("user_id", user_id)
@@ -119,38 +97,21 @@ export async function GET(request: NextRequest) {
     const content_id = searchParams.get("content_id");
     const content_type = searchParams.get("content_type");
 
-    if (!user_id || !content_id || !content_type) {
+    if (!content_id || !content_type) {
       return NextResponse.json({
         status: false,
         message: "Missing required query parameters",
       });
     }
 
-    const checkBlog = await blogRepository()
-      .whereEqualTo("id", content_id)
-      .findOne();
-    if (!checkBlog) {
-      return NextResponse.json({
-        status: false,
-        message: "Blog tidak ditemukan",
-      });
+    let userData;
+    if (user_id) {
+      userData = await repository
+        .whereEqualTo("user_id", user_id)
+        .whereEqualTo("content_id", content_id)
+        .whereEqualTo("content_type", content_type)
+        .findOne();
     }
-
-    const cekUser = await userRepository()
-      .whereEqualTo("id", user_id)
-      .findOne();
-    if (!cekUser) {
-      return NextResponse.json({
-        status: false,
-        message: "User tidak ditemukan",
-      });
-    }
-
-    const userData = await repository
-      .whereEqualTo("user_id", user_id)
-      .whereEqualTo("content_id", content_id)
-      .whereEqualTo("content_type", content_type)
-      .findOne();
 
     const allData = await repository
       .whereEqualTo("content_id", content_id)

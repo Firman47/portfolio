@@ -93,6 +93,16 @@ export const authOptions: NextAuthOptions = {
               ? profile?.avatar_url
               : "";
 
+          let username = fullName?.split(" ").join("").toLowerCase();
+
+          const existingUsername = await repository
+            .whereEqualTo("username", username)
+            .findOne();
+
+          if (existingUsername) {
+            username = `${username}${Math.floor(Math.random() * 1000)}`;
+          }
+
           const existingUser = await repository
             .whereEqualTo("email", email as string)
             .findOne();
@@ -102,6 +112,7 @@ export const authOptions: NextAuthOptions = {
             newUser.role = "user";
             newUser.email = email as string;
             newUser.full_name = fullName as string;
+            newUser.username = username;
             newUser.image = image as string;
             newUser.created_at = new Date();
             newUser.verificationStatus = "verified";
@@ -184,6 +195,7 @@ export const authOptions: NextAuthOptions = {
           id: updatedUserFromDB?.id as string,
           image: updatedUserFromDB?.image as string,
           role: updatedUserFromDB?.role as string,
+          username: updatedUserFromDB?.username as string,
           verificationStatus: updatedUserFromDB?.verificationStatus as string,
         };
       }

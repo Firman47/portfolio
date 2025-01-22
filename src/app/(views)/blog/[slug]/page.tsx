@@ -6,7 +6,6 @@ import { get, getBySlug } from "@/utils/home/blog";
 import { CategoryType } from "../../admin/category/types";
 import { Badge } from "@/components/ui/badge";
 import { get as getCategory } from "@/utils/home/category";
-import SkeletonBlogDetail from "./skeleton";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -15,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShareSection } from "./action/share";
 import { LikeSection } from "./action/like";
 import { CommentSection } from "./action/comment";
+import { PageSkeleton } from "./skeleton";
 
 interface BlogProps {
   params: Promise<{ slug: string }>;
@@ -87,7 +87,7 @@ export default function BlogDetail({ params }: BlogProps) {
   }, []);
 
   if (loading) {
-    return <SkeletonBlogDetail />;
+    return <PageSkeleton />;
   }
 
   return (
@@ -119,9 +119,9 @@ export default function BlogDetail({ params }: BlogProps) {
         </div>
 
         <div className="flex justify-center gap-4">
-          <LikeSection content_id={data?.id as string} />
+          <LikeSection content_id={data?.id as string} content_type="blog" />
 
-          <CommentSection />
+          <CommentSection content_id={data?.id as string} />
 
           <ShareSection
             title={data?.title as string}

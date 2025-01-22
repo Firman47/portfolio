@@ -5,5 +5,6 @@ const ablyClient = new Ably.Realtime(
 );
 
 export const ablyChannelLike = ablyClient.channels.get("likes");
+export const ablyChannelComment = ablyClient.channels.get("comments");
 
 export default ablyClient;

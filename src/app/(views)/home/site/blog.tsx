@@ -20,12 +20,13 @@ export const Blog = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
+
       try {
         const responseBlog = await getBlog();
         const responseCategory = await getCategory();
         const paginationBlog = responseBlog.data.slice(0, 3);
 
-        setLoading(true);
         setDataBlog(paginationBlog);
         setDataCategory(responseCategory.data);
       } catch (err) {
@@ -37,9 +38,11 @@ export const Blog = () => {
 
     fetchData();
   }, []);
+
   if (loading) {
     return <SkeletonBLog />;
   }
+
   return (
     <section
       id="blog"
